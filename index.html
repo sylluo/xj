@@ -222,6 +222,8 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .focus-num { width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#f0b24a,#e8a33d);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:Arial;box-shadow:0 2px 6px rgba(232,163,61,0.3); }
 .focus-input { flex:1;border:none;background:transparent;font-family:inherit;font-size:16px;color:var(--text);outline:none;line-height:1.5;padding:4px 0; }
 .focus-input::placeholder { color:var(--text-light); }
+.focus-done { width:20px;height:20px;flex-shrink:0;margin:0;cursor:pointer;-webkit-appearance:checkbox;appearance:checkbox;accent-color:var(--primary); }
+.focus-item.done .focus-input { text-decoration:line-through;color:var(--text-light); }
 
 /* 晨间六问 */
 .thought-questions { display:flex;flex-direction:column;gap:8px; }
@@ -270,6 +272,13 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .record-entry-del:hover { color:var(--danger); }
 .add-record-btn { width:100%;padding:10px;border-radius:10px;border:1px dashed var(--primary);background:transparent;color:var(--primary);font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;font-family:'Songti SC','STSong',serif;letter-spacing:1px; }
 .add-record-btn:hover { background:var(--primary-lighter); }
+.record-summary { margin-top:14px;padding-top:12px;border-top:1px solid var(--border); }
+.rs-title { font-size:13px;font-weight:600;color:var(--primary-dark);margin-bottom:10px;font-family:'Songti SC','STSong',serif;letter-spacing:1px; }
+.rs-group { margin-bottom:10px; }
+.rs-group:last-child { margin-bottom:0; }
+.rs-group-title { font-size:12px;color:var(--text-secondary);font-weight:600;margin-bottom:4px; }
+.rs-item { font-size:13px;color:var(--text);line-height:1.7;padding:4px 0 4px 10px;border-left:2px solid var(--primary-light);margin-bottom:2px; }
+.rs-empty { font-size:12px;color:var(--text-light);padding:6px 0; }
 
 /* 保存/导出 */
 .save-btn { width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);box-shadow:0 4px 14px rgba(62,107,95,0.25);color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;font-family:'Songti SC','STSong',serif;letter-spacing:3px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px; }
@@ -356,6 +365,17 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
 .calendar-overlay { position:fixed;inset:0;z-index:998;display:none; }
 .calendar-overlay.show { display:block; }
+
+/* 日记详情弹窗：底部抽屉式 */
+.detail-modal { position:fixed;inset:0;z-index:2000;display:none;align-items:flex-end;justify-content:center;background:rgba(30,40,50,.45); }
+.detail-modal.show { display:flex; }
+.detail-modal-card { background:#fff;width:100%;max-width:480px;max-height:82vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;animation:fadeInUp .25s ease; }
+.detail-modal-header { display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);font-size:15px;font-weight:600;color:var(--primary-dark);font-family:'Songti SC','STSong',serif;letter-spacing:1px; }
+.detail-modal-header button { background:none;border:none;color:var(--text-light);padding:0 2px;display:flex;align-items:center; }
+.detail-modal-body { overflow-y:auto;padding:12px 18px calc(20px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch; }
+.detail-table { width:100%;border-collapse:collapse;font-size:14px; }
+.detail-table th { text-align:left;color:var(--primary-dark);font-weight:600;padding:8px 10px 8px 0;width:92px;vertical-align:top;white-space:nowrap;font-family:'Songti SC','STSong',serif;border-bottom:1px dashed var(--border-light); }
+.detail-table td { padding:8px 0;color:var(--text);line-height:1.7;border-bottom:1px dashed var(--border-light);word-break:break-word; }
 
 
 /* 晨间六问默认提示文字样式 */
@@ -507,14 +527,17 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
             <div class="focus-item">
               <span class="focus-num num">1</span>
               <input type="text" class="focus-input" id="focus1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="第一件最重要的事...">
+              <input type="checkbox" class="focus-done" id="focusDone1" title="标记完成">
             </div>
             <div class="focus-item">
               <span class="focus-num num">2</span>
               <input type="text" class="focus-input" id="focus2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="第二件最重要的事...">
+              <input type="checkbox" class="focus-done" id="focusDone2" title="标记完成">
             </div>
             <div class="focus-item">
               <span class="focus-num num">3</span>
               <input type="text" class="focus-input" id="focus3" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="第三件最重要的事...">
+              <input type="checkbox" class="focus-done" id="focusDone3" title="标记完成">
             </div>
           </div>
         </div>
@@ -722,6 +745,10 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <button class="add-record-btn" id="addGrowth"><svg class="icon"><use href="#i-add"/></svg>添加成长记录</button>
         <div class="record-list" id="growthList"></div>
       </div>
+      <div class="record-summary">
+        <div class="rs-title">今日全部记录</div>
+        <div id="recordSummary"></div>
+      </div>
     </div>
 
     <button class="save-btn" id="saveBtn"><svg class="icon"><use href="#i-save"/></svg>保存日记</button>
@@ -788,12 +815,6 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     <div class="page-sub-header">
       <div class="page-sub-title">数据统计</div>
     </div>
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-card-num num" id="totalDays">0</div><div class="stat-card-label">累计日记</div></div>
-      <div class="stat-card"><div class="stat-card-num num" id="bestStreak">0</div><div class="stat-card-label">最长连续</div></div>
-      <div class="stat-card"><div class="stat-card-num num" id="totalSport">0</div><div class="stat-card-label">运动次数</div></div>
-      <div class="stat-card"><div class="stat-card-num num" id="totalStudy">0</div><div class="stat-card-label">学习次数</div></div>
-    </div>
     <div class="chart-card">
       <div class="chart-title"><svg class="icon"><use href="#i-check-circle"/></svg>习惯完成率</div>
       <div class="period-switch" id="habitPeriod">
@@ -804,7 +825,13 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     </div>
     <div style="text-align:center;padding:20px 0 10px;color:var(--text-secondary);font-size:12px;font-style:italic;letter-spacing:1px;">
       数据完全保存在本地浏览器中，离线可用
+    </div><div class="stats-grid">
+      <div class="stat-card"><div class="stat-card-num num" id="totalDays">0</div><div class="stat-card-label">累计日记</div></div>
+      <div class="stat-card"><div class="stat-card-num num" id="bestStreak">0</div><div class="stat-card-label">最长连续</div></div>
+      <div class="stat-card"><div class="stat-card-num num" id="totalSport">0</div><div class="stat-card-label">运动次数</div></div>
+      <div class="stat-card"><div class="stat-card-num num" id="totalStudy">0</div><div class="stat-card-label">学习次数</div></div>
     </div>
+    
 
   </div>
 </div>
@@ -815,6 +842,17 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     <button class="nav-item active" data-page="pageWrite"><svg class="icon"><use href="#i-edit"/></svg><span>写日记</span></button>
     <button class="nav-item" data-page="pageReview"><svg class="icon"><use href="#i-book-2"/></svg><span>回顾</span></button>
     <button class="nav-item" data-page="pageStats"><svg class="icon"><use href="#i-bar-chart"/></svg><span>统计</span></button>
+  </div>
+</div>
+
+<!-- 日记详情弹窗（回顾页点击日记卡片弹出） -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-modal-card">
+    <div class="detail-modal-header">
+      <span id="detailModalTitle">日记详情</span>
+      <button id="detailModalClose" title="关闭"><svg class="icon" style="font-size:18px;"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="detail-modal-body" id="detailModalBody"></div>
   </div>
 </div>
 
@@ -867,10 +905,13 @@ let studyRecords = [];
 let sportRecords = [];
 let growthRecords = [];
 let selectedGrowthTags = [];
+let focusDone = [false,false,false];
 let historyFilterMood = 'all';
 let habitPeriod = 'week';
 
 const habitNames = ['早起','阅读','运动','冥想'];
+// 每周计划目标天数（本周tab的分母）：早起5 / 阅读7 / 运动6 / 冥想5
+const habitTargets = [5,7,6,5];
 const moodMap = { happy:'😊',calm:'😌',tired:'😪',sad:'😔',excited:'🤩' };
 const moodNameMap = { happy:'开心',calm:'平静',tired:'疲惫',sad:'难过',excited:'兴奋' };
 const weatherMap = { sunny:'☀️',cloudy:'⛅',overcast:'☁️',rainy:'🌧️',snowy:'❄️' };
@@ -934,6 +975,7 @@ function loadEntry() {
   currentMood = '';
   currentWeather = '';
   currentHabits = [false,false,false,false];
+  focusDone = [false,false,false];
   studyRecords = [];
   sportRecords = [];
   growthRecords = [];
@@ -958,6 +1000,7 @@ function loadEntry() {
     currentMood = entry.mood||'';
     currentWeather = entry.weather||'';
     currentHabits = entry.habits||[false,false,false,false];
+    focusDone = entry.focusDone||[false,false,false];
     // 3件重点事：兼容字段 morningFocus（换行保存的旧数据） 和新字段 focus1/2/3
     if (entry.focus1 || entry.focus2 || entry.focus3) {
       document.getElementById('focus1').value = entry.focus1||'';
@@ -1017,9 +1060,16 @@ function loadEntry() {
       el.value = DEFAULT_THOUGHTS[id];
       applyThoughtStyle(el, true);
     });
+    // 需求1：前一天"明天计划"的三件事自动顺延为今日重点
+    const prev = entries[dateKey(addDays(currentDate,-1))];
+    if (prev && (prev.tmr1||prev.tmr2||prev.tmr3)) {
+      document.getElementById('focus1').value = prev.tmr1||'';
+      document.getElementById('focus2').value = prev.tmr2||'';
+      document.getElementById('focus3').value = prev.tmr3||'';
+    }
   }
 
-  renderMood(); renderWeather(); renderHabits(); renderRecordLists(); renderWeekRow();
+  renderMood(); renderWeather(); renderHabits(); renderFocusDone(); renderRecordLists(); renderWeekRow();
 }
 
 function renderMood() {
@@ -1028,12 +1078,36 @@ function renderMood() {
 function renderWeather() {
   document.querySelectorAll('.weather-item').forEach(it=>it.classList.toggle('active', it.dataset.weather===currentWeather));
 }
+function renderFocusDone() {
+  for (let i=1;i<=3;i++){
+    const cb = document.getElementById('focusDone'+i);
+    cb.checked = !!focusDone[i-1];
+    cb.closest('.focus-item').classList.toggle('done', !!focusDone[i-1]);
+  }
+}
+
 function renderHabits() {
   document.querySelectorAll('.habit-item').forEach((item,idx)=>{
     item.classList.toggle('checked', !!currentHabits[idx]);
     const cb = item.querySelector('.habit-checkbox');
     cb.innerHTML = currentHabits[idx] ? '<svg class="icon"><use href="#i-check"/></svg>' : '';
   });
+}
+
+// 成长记录卡片底部：运动/学习/成长分类汇总展示
+function renderSummary(){
+  const el = document.getElementById('recordSummary');
+  if (!el) return;
+  const groups = [
+    { name:'🏃 运动', items: sportRecords.map(r=>`${r.type||''}${r.duration?' · '+r.duration+'分钟':''}${r.cal?' · '+r.cal+'卡':''}${r.note?' · '+r.note:''}`) },
+    { name:'📖 学习', items: studyRecords.map(r=>`${r.content||''}${r.duration?' · '+r.duration+'分钟':''}${r.note?' · '+r.note:''}`) },
+    { name:'🌱 成长', items: growthRecords.map(r=>r.content+(r.tags&&r.tags.length?'　'+r.tags.map(t=>'#'+t).join(' '):'')) }
+  ];
+  const active = groups.filter(g=>g.items.length);
+  el.innerHTML = active.length
+    ? active.map(g=>`<div class="rs-group"><div class="rs-group-title">${g.name}（${g.items.length}条）</div>${
+        g.items.map(t=>`<div class="rs-item">${t}</div>`).join('')}</div>`).join('')
+    : '<div class="rs-empty">今天还没有记录</div>';
 }
 
 function renderRecordLists() {
@@ -1052,6 +1126,7 @@ function renderRecordLists() {
       <div class="record-entry-title">${r.content}</div>
       ${r.tags&&r.tags.length?'<div class="record-entry-meta">'+r.tags.map(t=>'#'+t).join(' ')+'</div>':''}
     </div><button class="record-entry-del" data-type="growth" data-idx="${i}"><svg class="icon"><use href="#i-close"/></svg></button></div>`).join('');
+  renderSummary();
 }
 
 function saveEntry() {
@@ -1060,6 +1135,7 @@ function saveEntry() {
     date: key,
     mood: currentMood, weather: currentWeather,
     habits: [...currentHabits],
+    focusDone: [...focusDone],
     // 晨间
     focus1: document.getElementById('focus1').value,
     focus2: document.getElementById('focus2').value,
@@ -1181,6 +1257,54 @@ function renderReviewCalendar(month) {
   document.getElementById('reviewStatStreak').textContent = streak;
 }
 
+// 回顾页：点击日记卡片弹出当天详情表格（单列：字段名+内容，逐行排列）
+function openDetailModal(dk){
+  const entry = entries[dk];
+  if (!entry) return;
+  const d = parseKey(dk);
+  const f = formatDate(d);
+  document.getElementById('detailModalTitle').textContent =
+    `${f.main} · ${f.weekday}${entry.mood?' '+moodMap[entry.mood]:''}${entry.weather?' '+weatherMap[entry.weather]:''}`;
+  const rows = [];
+  const add = (k,v)=>{ if (v!==undefined && v!==null && String(v).trim()) rows.push(`<tr><th>${k}</th><td>${v}</td></tr>`); };
+  // 晨间
+  add('🎯 重点 1', entry.focus1);
+  add('🎯 重点 2', entry.focus2);
+  add('🎯 重点 3', entry.focus3);
+  if (entry.focusDone && entry.focusDone.some(Boolean))
+    add('✅ 重点完成', entry.focusDone.map((v,i)=>v?`第${i+1}件完成`:`第${i+1}件未完成`).join('，'));
+  add('🌟 愿景', entry.qVision);
+  add('🎭 成为的人', entry.qBecome);
+  add('📈 比昨天更好', entry.qBetter);
+  add('😊 心情基调', entry.qMood);
+  add('👶 孩子面前', entry.qChild);
+  add('🤝 与人相处', entry.qPeople);
+  // 晚间
+  const habitsStr = (entry.habits||[]).map((v,i)=>v?habitNames[i]:null).filter(Boolean).join('、');
+  add('✔️ 习惯打卡', habitsStr);
+  add('👍 做得好的', entry.revGood);
+  add('🔧 需改进', entry.revImprove);
+  add('⛔ 需停止', entry.revStop);
+  add('🚀 需启动', entry.revStart);
+  add('📖 今日书账', entry.bookNote);
+  add('💡 今日新知', entry.newKnowledge);
+  add('✨ 今日灵感', entry.inspiration);
+  add('🍜 今日美食', entry.food);
+  add('👶 陪娃记录', entry.kidTime);
+  add('⏰ 浪费时间', entry.timeWaste);
+  add('🚩 明天 1', entry.tmr1);
+  add('🚩 明天 2', entry.tmr2);
+  add('🚩 明天 3', entry.tmr3);
+  // 成长记录
+  (entry.sportRecords||[]).forEach((r,i)=>add(`🏃 运动${(entry.sportRecords||[]).length>1?i+1:''}`, `${r.type||''}${r.duration?' · '+r.duration+'分钟':''}${r.cal?' · '+r.cal+'卡':''}${r.note?' · '+r.note:''}`));
+  (entry.studyRecords||[]).forEach((r,i)=>add(`📖 学习${(entry.studyRecords||[]).length>1?i+1:''}`, `${r.content||''}${r.duration?' · '+r.duration+'分钟':''}${r.note?' · '+r.note:''}`));
+  (entry.growthRecords||[]).forEach((r,i)=>add(`🌱 成长${(entry.growthRecords||[]).length>1?i+1:''}`, r.content+(r.tags&&r.tags.length?'　'+r.tags.map(t=>'#'+t).join(' '):'')));
+  document.getElementById('detailModalBody').innerHTML =
+    rows.length ? `<table class="detail-table">${rows.join('')}</table>` : '<div style="padding:20px 0;text-align:center;color:var(--text-light);font-size:13px;">这一天没有文字记录</div>';
+  document.getElementById('detailModal').classList.add('show');
+}
+function closeDetailModal(){ document.getElementById('detailModal').classList.remove('show'); }
+
 function showReviewDetail(dk) {
   const card = document.getElementById('reviewDetailCard');
   const dateEl = document.getElementById('reviewDetailDate');
@@ -1209,9 +1333,15 @@ function showReviewDetail(dk) {
     if (entry.inspiration) parts.push(`<div class="review-detail-section"><b>✨ 灵感：</b>${entry.inspiration}</div>`);
     const tmrStr = entry.tmr1||entry.tmr2||entry.tmr3 ? [entry.tmr1,entry.tmr2,entry.tmr3].filter(Boolean).join(' / ') : (entry.tomorrow||'');
     if (tmrStr) parts.push(`<div class="review-detail-section"><b>🚩 明天：</b>${tmrStr}</div>`);
-    // 学习/运动/成长条数
-    const sCnt = (entry.studyRecords||[]).length, spCnt=(entry.sportRecords||[]).length, gCnt=(entry.growthRecords||[]).length;
-    if (sCnt+spCnt+gCnt>0) parts.push(`<div class="review-detail-section"><b>🌱 成长：</b>学习${sCnt}条 · 运动${spCnt}条 · 成长${gCnt}条</div>`);
+    // 学习/运动/成长具体记录
+    const sp=(entry.sportRecords||[]), st=(entry.studyRecords||[]), gr=(entry.growthRecords||[]);
+    if (sp.length+st.length+gr.length>0){
+      const lines=[];
+      if (sp.length) lines.push('<b>🏃 运动：</b>'+sp.map(r=>`${r.type||''}${r.duration?r.duration+'分钟':''}${r.cal?'/'+r.cal+'卡':''}${r.note?'（'+r.note+'）':''}`).join('；'));
+      if (st.length) lines.push('<b>📖 学习：</b>'+st.map(r=>`${r.content||''}${r.duration?'（'+r.duration+'分钟）':''}${r.note?'-'+r.note:''}`).join('；'));
+      if (gr.length) lines.push('<b>🌱 成长：</b>'+gr.map(r=>r.content+(r.tags&&r.tags.length?' '+r.tags.map(t=>'#'+t).join(' '):'')).join('；'));
+      parts.push(`<div class="review-detail-section">${lines.join('<br>')}</div>`);
+    }
     body.innerHTML = parts.length ? parts.join('') : '<div class="review-detail-empty">这一天有打卡但无文字内容</div>';
   }
   card.classList.add('show');
@@ -1286,10 +1416,13 @@ function renderHabitStats() {
     h.forEach((v,idx)=>{if(v) totals[idx]++;});
   }
   document.getElementById('habitProgress').innerHTML = habitNames.map((name,i)=>{
-    const cnt=totals[i], denom=Math.max(totalDaysInRange,1), pct=Math.round(cnt/denom*100);
+    const cnt=totals[i];
+    // 本周按各习惯计划目标天数为分母；本月按当月已过去天数为分母
+    const denom = habitPeriod==='week' ? habitTargets[i] : Math.max(totalDaysInRange,1);
+    const pct = Math.min(100, Math.round(cnt/denom*100));
     return `<div class="habit-progress-item"><div class="habit-progress-name">${name}</div>
       <div class="habit-progress-bar"><div class="habit-progress-fill" style="width:${pct}%"></div></div>
-      <div class="habit-progress-info num"><span class="pct">${pct}%</span><span class="cnt">(${cnt}次)</span></div></div>`;
+      <div class="habit-progress-info num"><span class="pct">${pct}%</span><span class="cnt">(${cnt}次/${denom}次)</span></div></div>`;
   }).join('');
 }
 
@@ -1578,6 +1711,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
   })();
 
+  // 今日重点完成复选框
+  for (let i=1;i<=3;i++){
+    document.getElementById('focusDone'+i).addEventListener('change', (ev)=>{
+      focusDone[i-1] = ev.target.checked;
+      ev.target.closest('.focus-item').classList.toggle('done', ev.target.checked);
+    });
+  }
+
   document.getElementById('moodGrid').addEventListener('click',(e)=>{
     const it=e.target.closest('.mood-item');
     if(it){ currentMood = currentMood===it.dataset.mood?'':it.dataset.mood; renderMood(); }
@@ -1742,13 +1883,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
   var _hl=document.getElementById('historyList');if(_hl)_hl.addEventListener('click',(e)=>{
     const item=e.target.closest('.history-item');
     if(item){
-      // 点击历史条目：在回顾页内选中展示详情（不跳转）
+      // 点击搜索/历史条目：高亮联动 + 弹出当天详情表格
       reviewSelectedDate = item.dataset.date;
       renderHistory();
       renderReviewCalendar(reviewCalMonth);
       showReviewDetail(reviewSelectedDate);
+      openDetailModal(reviewSelectedDate);
     }
   });
+  // 详情弹窗关闭交互
+  var _dm=document.getElementById('detailModal');
+  if(_dm)_dm.addEventListener('click',(e)=>{ if(e.target===_dm) closeDetailModal(); });
+  var _dmc=document.getElementById('detailModalClose');
+  if(_dmc)_dmc.addEventListener('click', closeDetailModal);
 
   var _hp=document.getElementById('habitPeriod');if(_hp)_hp.addEventListener('click',(e)=>{
     const btn=e.target.closest('.period-btn');
