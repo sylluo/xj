@@ -459,10 +459,27 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .mindmap-actions button.primary { background:var(--primary);color:#fff;border-color:var(--primary); }
 .mindmap-body { flex:1;overflow:hidden;position:relative;background:#fafbfc; }
 .mindmap-canvas { width:100%;height:100%;display:block; }
-.mindmap-toolbar { position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:6px;background:#fff;padding:8px;border-radius:10px;box-shadow:var(--shadow);border:1px solid var(--border);z-index:2; }
-.mindmap-toolbar button { padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:4px; }
+.mindmap-toolbar { position:absolute;top:10px;left:10px;right:10px;display:flex;flex-direction:row;align-items:center;gap:6px;background:#fff;padding:8px;border-radius:10px;box-shadow:var(--shadow);border:1px solid var(--border);z-index:2;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch; }
+.mindmap-toolbar button { flex-shrink:0;white-space:nowrap;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:4px; }
 .mindmap-toolbar button:hover { background:var(--primary-lighter);border-color:var(--primary); }
 .mindmap-toolbar button.active { background:var(--primary);color:#fff; }
+.mm-multi-bar { position:absolute;left:50%;bottom:64px;transform:translateX(-50%);display:none;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.14);padding:8px 10px;z-index:3;white-space:nowrap; }
+.mm-multi-bar.show { display:flex; }
+.mm-multi-bar .mm-multi-count { font-size:12px;color:var(--text-secondary);margin-right:2px; }
+.mm-multi-bar button { padding:6px 9px;border-radius:8px;border:1px solid var(--border);background:#fff;font-family:inherit;font-size:12px;color:var(--text);cursor:pointer; }
+.mm-multi-bar button:hover { background:var(--primary-lighter);border-color:var(--primary); }
+.mm-multi-bar #mmMultiDone { background:var(--primary);border-color:var(--primary);color:#fff; }
+/* 思维导图页内确认对话框 */
+.mm-confirm { position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;background:rgba(30,40,45,.35); }
+.mm-confirm.show { display:flex; }
+.mm-confirm-box { width:80%;max-width:300px;background:#fff;border-radius:14px;padding:20px 18px 14px;box-shadow:0 12px 32px rgba(0,0,0,.18); }
+.mm-confirm-text { font-size:14px;color:var(--text);line-height:1.6;text-align:center;margin-bottom:16px; }
+.mm-confirm-actions { display:flex;gap:10px; }
+.mm-confirm-actions button { flex:1;padding:10px 0;border-radius:10px;border:1px solid var(--border);background:#f5f7f8;color:var(--text-secondary);font-family:inherit;font-size:14px;cursor:pointer; }
+.mm-confirm-actions button.danger { background:#d9534f;border-color:#d9534f;color:#fff; }
+.mm-marker-list { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px; }
+.mm-marker-list button { padding:8px 0;font-size:18px;border-radius:10px;border:1px solid var(--border);background:#f7f9fa;cursor:pointer; }
+.mm-marker-list button:hover { border-color:var(--primary);background:var(--primary-lighter); }
 .mindmap-hint { position:absolute;bottom:10px;left:10px;right:10px;font-size:11px;color:var(--text-light);background:rgba(255,255,255,.9);padding:6px 10px;border-radius:8px;text-align:center;pointer-events:none; }
 
 /* ============ 复盘页 ============ */
@@ -596,11 +613,26 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .mm-tree li { position:relative; }
 .mm-tree li::before { content:'├─'; color:var(--border-light); margin-right:4px; }
 .mm-tree li:last-child::before { content:'└─'; }
+.mm-caret { display:inline-block; cursor:pointer; color:var(--primary); font-size:11px; margin-right:4px; user-select:none; transition:transform .2s; }
+.mm-tree li.mm-collapsed > .mm-caret { transform:rotate(-90deg); }
+.mm-tree li.mm-collapsed > ul { display:none; }
+.mm-node-text { cursor:default; }
+.mm-summary-line { display:inline-block; font-size:11px; line-height:1.5; color:#8a6d2f; background:#fff8e6; border:1px solid #e2c07a; border-radius:6px; padding:1px 6px; margin:2px 0 3px 14px; }
 
 /* 成长标签筛选 */
 .growth-tag-filter { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; padding:8px; background:var(--bg-card); border-radius:10px; border:1px solid var(--border-light); }
 .growth-tag-filter .tag { padding:4px 10px; border-radius:12px; font-size:12px; background:#eef2f5; color:#5c6b77; cursor:pointer; border:none; }
 .growth-tag-filter .tag.active { background:var(--primary); color:#fff; }
+/* 成长按标签分组 */
+.growth-group { background:var(--bg-card); border:1px solid var(--border-light); border-radius:10px; margin-bottom:8px; overflow:hidden; }
+.growth-group-head { display:flex; align-items:center; gap:6px; padding:9px 12px; cursor:pointer; user-select:none; font-size:13px; font-weight:600; color:var(--primary-dark); background:#eef4f1; }
+.growth-group-count { margin-left:auto; font-size:11px; font-weight:500; color:var(--text-light); background:#fff; border-radius:10px; padding:1px 8px; }
+.growth-caret { font-size:11px; color:var(--primary); transition:transform .2s; }
+.growth-group.collapsed .growth-caret { transform:rotate(-90deg); }
+.growth-group.collapsed .growth-group-body { display:none; }
+.growth-group-body { padding:8px; }
+.growth-group-body .review-list-item { margin-bottom:6px; }
+.growth-group-body .review-list-item:last-child { margin-bottom:0; }
 
 /* 反思输入框字号：比小标题(13px)略小 */
 .reflection-hint { font-size:11px; color:var(--text-light); line-height:1.5; margin:-2px 0 5px; letter-spacing:.2px; }
@@ -1174,8 +1206,8 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 
     <div class="review-tabs" id="reviewTabs">
       <button class="review-tab active" data-tab="habit">📊 习惯养成</button>
-      <button class="review-tab" data-tab="week">📅 周复盘</button>
-      <button class="review-tab" data-tab="month">📆 月复盘</button>
+      <button class="review-tab" data-tab="week">🗓️ 周复盘</button>
+      <button class="review-tab" data-tab="month">🗓️ 月复盘</button>
       <button class="review-tab" data-tab="season">🗓️ 季复盘</button>
     </div>
 
@@ -1284,7 +1316,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <button class="cal-nav-btn" id="monthReviewNext"><svg class="icon"><use href="#i-arrow-right"></use></svg></button>
       </div>
       <div class="card collapsible open rev-fold" data-collapse="monthOverview">
-        <div class="card-title clickable"><span>📆 月度汇总</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
+        <div class="card-title clickable"><span>📋 月度汇总</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
         <div class="collapse-body" id="monthOverviewBody">
           <div id="monthReviewContent">
             <div class="review-detail-empty">请选择月份查看月复盘</div>
@@ -1386,13 +1418,51 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
   </div>
   <div class="mindmap-body">
     <div class="mindmap-toolbar">
+      <button id="mmMultiToggle" title="多选节点">☑ 多选</button>
       <button id="mmAddNode" title="添加子节点">＋ 子节点</button>
+      <button id="mmAddSibling" title="添加同级节点">＋ 同级</button>
       <button id="mmEditNode" title="编辑节点文字">✏️ 编辑</button>
-      <button id="mmDelNode" title="删除节点">🗑 删除</button>
+      <button id="mmSummary" title="为节点添加概要">📝 概要</button>
+      <button id="mmMarker" title="为节点添加标记">🏷 标记</button>
       <button id="mmClear" title="清空">清空</button>
+      <button id="mmDelNode" title="删除节点">🗑 删除</button>
     </div>
     <canvas class="mindmap-canvas" id="mindmapCanvas"></canvas>
-    <div class="mindmap-hint">点节点选中；再点一次同一节点可编辑文字；拖动可移动位置</div>
+    <div class="mm-multi-bar" id="mmMultiBar">
+      <span class="mm-multi-count" id="mmMultiCount">已选 0 个节点</span>
+      <button id="mmMultiSummary">📝 添加概要</button>
+      <button id="mmMultiMarker">🏷 添加标记</button>
+      <button id="mmMultiDone">完成</button>
+    </div>
+    <div class="mindmap-hint">右下角「+」新增子节点；「‹」收起子节点，点击数字展开；点节点再点一次可编辑；「☑ 多选」批量加概要/标记；空白处拖动可平移整个导图</div>
+  </div>
+  <div class="mm-confirm" id="mmConfirm">
+    <div class="mm-confirm-box">
+      <div class="mm-confirm-text" id="mmConfirmText"></div>
+      <div class="mm-confirm-actions">
+        <button id="mmConfirmCancel">取消</button>
+        <button class="danger" id="mmConfirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+  <div class="mm-confirm" id="mmMarkerPanel">
+    <div class="mm-confirm-box">
+      <div class="mm-confirm-text">选择节点标记</div>
+      <div class="mm-marker-list">
+        <button data-marker="⭐">⭐</button>
+        <button data-marker="❗">❗</button>
+        <button data-marker="✅">✅</button>
+        <button data-marker="❓">❓</button>
+        <button data-marker="💡">💡</button>
+        <button data-marker="🔥">🔥</button>
+        <button data-marker="⚠️">⚠️</button>
+        <button data-marker="🚩">🚩</button>
+      </div>
+      <div class="mm-confirm-actions">
+        <button id="mmMarkerClear">清除标记</button>
+        <button id="mmMarkerCancel">取消</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2459,6 +2529,26 @@ function navigateTo(target, opts){
 
 // ============ 思维导图（Canvas 实现） ============
 let mmCanvas, mmCtx, mmNodes, mmSelectedId, mmDragging, mmDragOffset, mmNextId;
+let mmCollapsed = new Set(); // 编辑器中已收起子节点的节点 id
+let mmMultiMode = false, mmMultiSel = new Set(); // 多选模式及已选节点
+
+// 取最近一次保存的思维导图（按日期向前回溯，用于跨日期延续编辑）
+function latestMindmap(kind, upToKey){
+  const keys = Object.keys(entries||{}).filter(k=>!upToKey || k<=upToKey).sort().reverse();
+  for (const k of keys){
+    const e = entries[k];
+    if (!e) continue;
+    if (kind==='book'){
+      if (e.bookMindmap && e.bookMindmap.nodes && e.bookMindmap.nodes.length) return e.bookMindmap;
+    } else if (kind==='study'){
+      const recs = e.studyRecords || [];
+      for (let i=recs.length-1;i>=0;i--){
+        if (recs[i].mindmap && recs[i].mindmap.nodes && recs[i].mindmap.nodes.length) return recs[i].mindmap;
+      }
+    }
+  }
+  return null;
+}
 
 function openMindmap(target, existingData){
   mindmapTarget = target;
@@ -2477,22 +2567,74 @@ function openMindmap(target, existingData){
     mmNextId = 1;
   }
   mmSelectedId = 0;
+  mmCollapsed = new Set();
+  mmMultiMode = false;
+  mmMultiSel = new Set();
+  const mt = document.getElementById('mmMultiToggle');
+  if (mt) mt.classList.remove('active');
+  updateMmMultiBar();
   drawMindmap();
 }
+function updateMmMultiBar(){
+  const bar = document.getElementById('mmMultiBar');
+  if (!bar) return;
+  const n = mmMultiSel.size;
+  document.getElementById('mmMultiCount').textContent = `已选 ${n} 个节点`;
+  bar.classList.toggle('show', mmMultiMode && n >= 2);
+}
 function closeMindmap(){
+  mmCloseConfirm(false);
+  mmMultiMode = false;
+  mmMultiSel.clear();
+  updateMmMultiBar();
+  const mp = document.getElementById('mmMarkerPanel');
+  if (mp) mp.classList.remove('show');
   document.getElementById('mindmapModal').classList.remove('show');
+}
+// 页内确认对话框
+let mmConfirmCb = null;
+function mmAskConfirm(text, cb){
+  document.getElementById('mmConfirmText').textContent = text;
+  mmConfirmCb = cb || null;
+  document.getElementById('mmConfirm').classList.add('show');
+}
+function mmCloseConfirm(ok){
+  const box = document.getElementById('mmConfirm');
+  if (box) box.classList.remove('show');
+  const cb = mmConfirmCb;
+  mmConfirmCb = null;
+  if (ok && cb) cb();
 }
 function resizeMindmap(){
   const rect = mmCanvas.parentElement.getBoundingClientRect();
   mmCanvas.width = rect.width;
   mmCanvas.height = rect.height;
 }
+// 仅返回当前可见的节点（折叠节点的后代不绘制、不可选中）
+function getVisibleMmNodes(){
+  const visible = [];
+  const queue = mmNodes.filter(n=>n.parent===null);
+  while (queue.length){
+    const n = queue.shift();
+    visible.push(n);
+    if (!mmCollapsed.has(n.id)){
+      mmNodes.forEach(c=>{ if (c.parent===n.id) queue.push(c); });
+    }
+  }
+  return visible;
+}
+// 节点显示文本（含标记）
+function mmLabel(n){
+  return (n.marker ? n.marker + ' ' : '') + (n.text || '');
+}
 function drawMindmap(){
   const ctx = mmCtx;
   ctx.clearRect(0,0,mmCanvas.width,mmCanvas.height);
+  const visible = getVisibleMmNodes();
+  const visibleIds = new Set(visible.map(n=>n.id));
   // 连线
-  mmNodes.forEach(n=>{
-    if (n.parent!==null){
+  visible.forEach(n=>{
+    if (n.parent!==null && visibleIds.has(n.parent)){
       const p = mmNodes.find(x=>x.id===n.parent);
       if (p){
         ctx.strokeStyle = '#a8b3bd';
@@ -2505,10 +2647,12 @@ function drawMindmap(){
     }
   });
   // 节点
-  mmNodes.forEach(n=>{
-    const selected = n.id===mmSelectedId;
+  visible.forEach(n=>{
+    const inMulti = mmMultiSel.has(n.id);
+    const selected = inMulti || n.id===mmSelectedId;
     ctx.font = '13px -apple-system,"PingFang SC",sans-serif';
-    const w = Math.max(60, ctx.measureText(n.text).width + 20);
+    const label = mmLabel(n);
+    const w = Math.max(60, ctx.measureText(label).width + 20);
     const h = 28;
     ctx.fillStyle = selected ? '#5b8c7d' : (n.parent===null ? '#e8a87c' : '#ffffff');
     ctx.strokeStyle = selected ? '#3e6b5f' : '#5b8c7d';
@@ -2519,8 +2663,95 @@ function drawMindmap(){
     ctx.fillStyle = selected ? '#fff' : (n.parent===null ? '#fff' : '#2f3a44');
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(n.text, n.x, n.y);
+    ctx.fillText(label, n.x, n.y);
+    // 多选勾选标记
+    if (inMulti){
+      ctx.beginPath();
+      ctx.arc(n.x-w/2, n.y-h/2, 8, 0, Math.PI*2);
+      ctx.fillStyle = '#3e6b5f';
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('✓', n.x-w/2, n.y-h/2);
+    }
+    // 概要改为节点右侧的大括号（在循环外统一绘制）
+    // 语雀风格：右下角「+」新增子节点；有子节点时「+」左侧显示「‹」收起，收起后显示子节点数量
+    const kids = mmNodes.filter(c=>c.parent===n.id);
+    const g = mmBadgeGeom(n, w);
+    if (kids.length){
+      const isCollapsed = mmCollapsed.has(n.id);
+      ctx.beginPath();
+      ctx.arc(g.togX, g.togY, g.r, 0, Math.PI*2);
+      ctx.fillStyle = isCollapsed ? '#5b8c7d' : '#fff';
+      ctx.strokeStyle = '#5b8c7d';
+      ctx.lineWidth = 1.2;
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = isCollapsed ? '#fff' : '#3e6b5f';
+      ctx.font = isCollapsed ? 'bold 10px sans-serif' : 'bold 13px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(isCollapsed ? String(kids.length) : '‹', g.togX, g.togY);
+    }
+    ctx.beginPath();
+    ctx.arc(g.addX, g.addY, g.r, 0, Math.PI*2);
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#5b8c7d';
+    ctx.lineWidth = 1.2;
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#3e6b5f';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('+', g.addX, g.addY);
   });
+  // 概要：语雀风格大括号（同一父节点下相同概要的节点合并为一个括号）
+  mmSummaryLayout().forEach(g=>{
+    const x1 = g.x, x2 = g.x + 7, x3 = x2 + 6;
+    ctx.strokeStyle = '#d9a441';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(x1, g.y0);
+    ctx.quadraticCurveTo(x2, g.y0, x2, g.y0 + 7);
+    ctx.lineTo(x2, g.ym - 7);
+    ctx.quadraticCurveTo(x2, g.ym, x3, g.ym);
+    ctx.quadraticCurveTo(x2, g.ym, x2, g.ym + 7);
+    ctx.lineTo(x2, g.y1 - 7);
+    ctx.quadraticCurveTo(x2, g.y1, x1, g.y1);
+    ctx.stroke();
+    const txt = g.text.length > 12 ? g.text.slice(0,12) + '…' : g.text;
+    ctx.font = '11px -apple-system,"PingFang SC",sans-serif';
+    ctx.fillStyle = '#8a6d2f';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(txt, x3 + 6, g.ym);
+  });
+}
+// 概要分组布局：同父节点下概要文字相同的节点共用一个括号
+function mmSummaryLayout(){
+  const visible = getVisibleMmNodes();
+  const groups = new Map();
+  visible.forEach(n=>{
+    if (!n.summary) return;
+    const key = (n.parent===null?'root':n.parent) + '||' + n.summary;
+    if (!groups.has(key)) groups.set(key, {text:n.summary, nodes:[]});
+    groups.get(key).nodes.push(n);
+  });
+  const out = [];
+  groups.forEach(g=>{
+    const y0 = Math.min(...g.nodes.map(n=>n.y-14));
+    const y1 = Math.max(...g.nodes.map(n=>n.y+14));
+    const x = Math.max(...g.nodes.map(n=>n.x + mmNodeWidth(n)/2)) + 26;
+    out.push({text:g.text, nodes:g.nodes, x, y0, y1, ym:(y0+y1)/2});
+  });
+  return out;
+}
+// 节点右下角按钮几何位置（add: 新增子节点；tog: 收起/展开）
+function mmBadgeGeom(n, w){
+  const y = n.y + 12;
+  const addX = n.x + w/2 + 8;
+  return {addX, addY:y, togX:addX-20, togY:y, r:8};
+}
+function mmNodeWidth(n){
+  mmCtx.font = '13px -apple-system,"PingFang SC",sans-serif';
+  return Math.max(60, mmCtx.measureText(mmLabel(n)).width + 20);
 }
 function roundRect(ctx,x,y,w,h,r){
   ctx.beginPath();
@@ -2532,18 +2763,48 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.closePath();
 }
 function mmHitTest(x,y){
-  const ctx = mmCtx;
-  for (let i=mmNodes.length-1;i>=0;i--){
-    const n = mmNodes[i];
-    ctx.font = '13px sans-serif';
-    const w = Math.max(60, ctx.measureText(n.text).width + 20);
+  const visible = getVisibleMmNodes();
+  for (let i=visible.length-1;i>=0;i--){
+    const n = visible[i];
+    const w = mmNodeWidth(n);
     const h = 28;
     if (x>=n.x-w/2 && x<=n.x+w/2 && y>=n.y-h/2 && y<=n.y+h/2) return n;
   }
   return null;
 }
+// 命中概要大括号右侧的文字
+function mmSummaryHitTest(x,y){
+  const lays = mmSummaryLayout();
+  for (let i=lays.length-1;i>=0;i--){
+    const g = lays[i];
+    const txt = g.text.length > 12 ? g.text.slice(0,12) + '…' : g.text;
+    mmCtx.font = '11px -apple-system,"PingFang SC",sans-serif';
+    const tw = mmCtx.measureText(txt).width;
+    if (x >= g.x+10 && x <= g.x+14+tw && y >= g.ym-10 && y <= g.ym+10){
+      return {nodes:g.nodes, text:g.text};
+    }
+  }
+  return null;
+}
+// 命中节点右下角的「+」（新增子节点）或「‹/数字」（收起/展开）
+function mmBadgeHitTest(x,y){
+  const visible = getVisibleMmNodes();
+  for (let i=visible.length-1;i>=0;i--){
+    const n = visible[i];
+    const w = mmNodeWidth(n);
+    const g = mmBadgeGeom(n, w);
+    if (Math.hypot(x-g.addX, y-g.addY) <= g.r+2) return {node:n, type:'add'};
+    if (mmNodes.some(c=>c.parent===n.id) && Math.hypot(x-g.togX, y-g.togY) <= g.r+2) return {node:n, type:'toggle'};
+  }
+  return null;
+}
 function saveMindmap(){
-  const data = {nodes: mmNodes.map(n=>({id:n.id,text:n.text,x:n.x,y:n.y,parent:n.parent}))};
+  const data = {nodes: mmNodes.map(n=>{
+    const o = {id:n.id,text:n.text,x:n.x,y:n.y,parent:n.parent};
+    if (n.marker) o.marker = n.marker;
+    if (n.summary) o.summary = n.summary;
+    return o;
+  })};
   if (mindmapTarget==='book'){
     bookMindmapSaved = data;
   } else if (mindmapTarget==='study'){
@@ -2971,10 +3232,13 @@ function mindmapToTree(mm){
     else root = byId[n.id];
   });
   function walk(node){
-    let s = `<li>${escapeHtml(node.text||'节点')}`;
-    if (node.children.length){
-      s += `<ul>${node.children.map(walk).join('')}</ul>`;
-    }
+    const hasKids = node.children.length > 0;
+    const label = (node.marker ? node.marker + ' ' : '') + (node.text || '节点');
+    let s = `<li class="mm-node">`;
+    if (hasKids) s += `<span class="mm-caret">▾</span>`;
+    s += `<span class="mm-node-text">${escapeHtml(label)}</span>`;
+    if (node.summary) s += `<div class="mm-summary-line">📝 ${escapeHtml(node.summary)}</div>`;
+    if (hasKids) s += `<ul>${node.children.map(walk).join('')}</ul>`;
     s += '</li>';
     return s;
   }
@@ -3005,32 +3269,36 @@ function renderReviewSection(section){
     const items = [];
     keys.forEach(dk=>{
       const e = entries[dk];
-      if (e && (e.bookNote && e.bookNote.trim() || e.bookMindmap)){
-        items.push({dk, note:e.bookNote||'', mindmap:e.bookMindmap||null});
+      if (e && e.bookNote && e.bookNote.trim()){
+        items.push({dk, note:e.bookNote});
       }
     });
-    body.innerHTML = items.length
-      ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span>${it.mindmap?'🧠':'📖'}</div>
-        ${it.note?`<div class="review-list-content">${escapeHtml(it.note)}</div>`:''}
-        ${it.mindmap?`<div class="review-mindmap-view"><div class="review-mindmap-title">🧠 思维导图（树状）：</div>${mindmapToTree(it.mindmap)}</div>`:''}
+    const mm = latestMindmap('book');
+    const mmCard = `<div class="card collapsible open" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
+      <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
+    body.innerHTML = mmCard + (items.length
+      ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
+        <div class="review-list-content">${escapeHtml(it.note)}</div>
       </div>`).join('')
-      : '<div class="review-detail-empty">暂无书账记录</div>';
+      : '<div class="review-detail-empty">暂无书账记录</div>');
   } else if (section==='study'){
     const items = [];
     keys.forEach(dk=>{
       const e = entries[dk];
       if (e && e.studyRecords && e.studyRecords.length){
         e.studyRecords.forEach((r,i)=>{
-          items.push({dk, idx:i, content:r.content||'', type:r.type||'', duration:r.duration||'', note:r.note||'', mindmap:r.mindmap||null});
+          items.push({dk, idx:i, content:r.content||'', type:r.type||'', duration:r.duration||'', note:r.note||''});
         });
       }
     });
-    body.innerHTML = items.length
-      ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span>${it.mindmap?'🧠':'📖'}</div>
+    const mm = latestMindmap('study');
+    const mmCard = `<div class="card collapsible open" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
+      <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
+    body.innerHTML = mmCard + (items.length
+      ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
         <div class="review-list-content"><b>${escapeHtml(it.content)}</b> ${it.type?`· ${escapeHtml(it.type)}`:''} ${it.duration?`· ${it.duration}分钟`:''} ${it.note?`— ${escapeHtml(it.note)}`:''}</div>
-        ${it.mindmap?`<div class="review-mindmap-view"><div class="review-mindmap-title">🧠 思维导图（树状）：</div>${mindmapToTree(it.mindmap)}</div>`:''}
       </div>`).join('')
-      : '<div class="review-detail-empty">暂无学习记录</div>';
+      : '<div class="review-detail-empty">暂无学习记录</div>');
   } else if (section==='growth'){
     const items = [];
     keys.forEach(dk=>{
@@ -3041,17 +3309,30 @@ function renderReviewSection(section){
     });
     // 收集所有标签
     const allTags = [...new Set(items.flatMap(x=>x.tags))];
-    let items2 = items;
-    if (growthTagFilter){
-      items2 = items.filter(x=>x.tags.includes(growthTagFilter));
-    }
-    body.innerHTML = `<div class="growth-tag-filter"><span class="tag ${!growthTagFilter?'active':''}" data-tag="">全部</span>` +
+    // 按标签分组（无标签归入「未分类」，多标签会出现在多个分组中）
+    const groups = {};
+    items.forEach(it=>{
+      const ts = it.tags.length ? it.tags : ['未分类'];
+      ts.forEach(t=>{ (groups[t] = groups[t] || []).push(it); });
+    });
+    let groupNames = Object.keys(groups);
+    if (growthTagFilter) groupNames = groupNames.filter(t=>t===growthTagFilter);
+    groupNames.sort((a,b)=> groups[b].length - groups[a].length || a.localeCompare(b));
+    const filterBar = `<div class="growth-tag-filter"><span class="tag ${!growthTagFilter?'active':''}" data-tag="">全部</span>` +
       allTags.map(t=>`<span class="tag ${growthTagFilter===t?'active':''}" data-tag="${escapeHtml(t)}">#${escapeHtml(t)}</span>`).join('') +
-      `</div>` +
-      (items2.length ? items2.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
-        <div class="review-list-content">${escapeHtml(it.content)}${it.tags.length?`<div style="color:var(--text-light);font-size:11px;margin-top:4px;">${it.tags.map(t=>'#'+t).join(' ')}</div>`:''}</div>
-      </div>`).join('') : '<div class="review-detail-empty">暂无成长记录</div>');
+      `</div>`;
+    const groupsHtml = groupNames.length ? groupNames.map(t=>{
+      const list = groups[t];
+      const isUntagged = t==='未分类';
+      return `<div class="growth-group"><div class="growth-group-head"><span class="growth-group-name">${isUntagged?'🏷 未分类':'#'+escapeHtml(t)}</span><span class="growth-group-count">${list.length} 条</span><span class="growth-caret">▾</span></div>
+        <div class="growth-group-body">${list.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
+          <div class="review-list-content">${escapeHtml(it.content)}${it.tags.length?`<div style="color:var(--text-light);font-size:11px;margin-top:4px;">${it.tags.map(x=>'#'+x).join(' ')}</div>`:''}</div>
+        </div>`).join('')}</div>
+      </div>`;
+    }).join('') : '<div class="review-detail-empty">暂无成长记录</div>';
+    body.innerHTML = filterBar + groupsHtml;
   }
+  initCollapsible();
 }
 
 // ============ 词云 / 月反思 辅助 ============
@@ -3165,6 +3446,8 @@ function syncMonthAction(){
 // ============ 折叠 / 展开 ============
 function initCollapsible(){
   document.querySelectorAll('.card.collapsible').forEach(card=>{
+    if (card.dataset.cbBound) return;
+    card.dataset.cbBound = '1';
     const title = card.querySelector('.card-title.clickable');
     if (!title) return;
     const body = card.querySelector('.collapse-body');
@@ -3195,6 +3478,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const v = t.dataset.tag;
       growthTagFilter = v==='' ? null : v;
       renderReviewSection('growth');
+    }
+  });
+  // 回顾页思维导图树：点击箭头折叠/展开父节点
+  document.addEventListener('click',(e)=>{
+    const caret = e.target.closest('#reviewSectionBody .mm-caret');
+    if (caret){
+      const li = caret.closest('li');
+      if (li) li.classList.toggle('mm-collapsed');
+      return;
+    }
+    const gh = e.target.closest('#reviewSectionBody .growth-group-head');
+    if (gh){
+      const g = gh.closest('.growth-group');
+      if (g) g.classList.toggle('collapsed');
     }
   });
   // 回顾页日历点击后刷新 section
@@ -3696,10 +3993,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // ============ 思维导图事件 ============
   document.getElementById('studyMindmapBtn').addEventListener('click',()=>{
-    openMindmap('study', studyMindmapSaved);
+    openMindmap('study', studyMindmapSaved || latestMindmap('study', dateKey(currentDate)));
   });
   document.getElementById('bookMindmapBtn').addEventListener('click',()=>{
-    openMindmap('book', bookMindmapSaved);
+    openMindmap('book', bookMindmapSaved || latestMindmap('book', dateKey(currentDate)));
   });
   document.getElementById('mindmapClose').addEventListener('click', closeMindmap);
   document.getElementById('mindmapSave').addEventListener('click', saveMindmap);
@@ -3709,29 +4006,133 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const txt = prompt('编辑节点文字：', node.text);
     if (txt !== null && txt.trim()) { node.text = txt.trim(); drawMindmap(); }
   }
-  document.getElementById('mmAddNode').addEventListener('click',()=>{
-    if (mmSelectedId===null) return;
-    const parent = mmNodes.find(n=>n.id===mmSelectedId);
-    const childCount = mmNodes.filter(n=>n.parent===mmSelectedId).length;
+  function mmAddChild(parentId){
+    const parent = mmNodes.find(n=>n.id===parentId);
+    if (!parent) return;
+    const childCount = mmNodes.filter(n=>n.parent===parentId).length;
     const newNode = {
       id: mmNextId++,
       text: '新节点',
       x: parent.x + 120,
       y: parent.y + childCount*40 - 60,
-      parent: mmSelectedId
+      parent: parentId
     };
     mmNodes.push(newNode);
+    mmCollapsed.delete(parentId); // 新增子节点时自动展开父节点
     mmSelectedId = newNode.id;
     drawMindmap();
     // 新增后直接进入改名，避免手机端找不到编辑入口
+    editMmNode(newNode);
+  }
+  document.getElementById('mmAddNode').addEventListener('click',()=>{
+    if (mmSelectedId===null) return;
+    mmAddChild(mmSelectedId);
+  });
+  document.getElementById('mmAddSibling').addEventListener('click',()=>{
+    if (mmSelectedId===null) { showToast('请先点选一个节点'); return; }
+    const cur = mmNodes.find(n=>n.id===mmSelectedId);
+    if (!cur || cur.parent===null) { showToast('根节点没有同级'); return; }
+    const sameLevel = mmNodes.filter(n=>n.parent===cur.parent).length;
+    const newNode = {
+      id: mmNextId++,
+      text: '新节点',
+      x: cur.x,
+      y: cur.y + sameLevel*40,
+      parent: cur.parent
+    };
+    mmNodes.push(newNode);
+    mmCollapsed.delete(cur.parent); // 新增同级节点时自动展开父节点
+    mmSelectedId = newNode.id;
+    drawMindmap();
     editMmNode(newNode);
   });
   document.getElementById('mmEditNode').addEventListener('click',()=>{
     if (mmSelectedId===null){ showToast('请先点选一个节点'); return; }
     editMmNode(mmNodes.find(n=>n.id===mmSelectedId));
   });
+  function editMmSummary(node){
+    if (!node) return;
+    const txt = prompt('输入概要（留空则删除）：', node.summary || '');
+    if (txt===null) return;
+    const v = txt.trim();
+    if (v) node.summary = v; else delete node.summary;
+    drawMindmap();
+  }
+  function editMmSummaryGroup(nodes, current){
+    if (!nodes || !nodes.length) return;
+    const txt = prompt('输入概要（留空则删除）：', current || '');
+    if (txt===null) return;
+    const v = txt.trim();
+    nodes.forEach(n=>{ if (v) n.summary = v; else delete n.summary; });
+    drawMindmap();
+  }
+  document.getElementById('mmSummary').addEventListener('click',()=>{
+    if (mmSelectedId===null){ showToast('请先点选一个节点'); return; }
+    editMmSummary(mmNodes.find(n=>n.id===mmSelectedId));
+  });
+  let mmMarkerTargets = [];
+  document.getElementById('mmMarker').addEventListener('click',()=>{
+    if (mmSelectedId===null){ showToast('请先点选一个节点'); return; }
+    mmMarkerTargets = [mmSelectedId];
+    document.getElementById('mmMarkerPanel').classList.add('show');
+  });
+  document.getElementById('mmMarkerPanel').addEventListener('click',(e)=>{
+    const b = e.target.closest('.mm-marker-list button');
+    if (!b) return;
+    mmMarkerTargets.forEach(id=>{
+      const node = mmNodes.find(n=>n.id===id);
+      if (node) node.marker = b.dataset.marker;
+    });
+    document.getElementById('mmMarkerPanel').classList.remove('show');
+    drawMindmap();
+  });
+  document.getElementById('mmMarkerClear').addEventListener('click',()=>{
+    mmMarkerTargets.forEach(id=>{
+      const node = mmNodes.find(n=>n.id===id);
+      if (node) delete node.marker;
+    });
+    document.getElementById('mmMarkerPanel').classList.remove('show');
+    drawMindmap();
+  });
+  document.getElementById('mmMarkerCancel').addEventListener('click',()=>{
+    document.getElementById('mmMarkerPanel').classList.remove('show');
+  });
+  // ============ 多选：批量添加概要 / 标记 ============
+  document.getElementById('mmMultiToggle').addEventListener('click',()=>{
+    mmMultiMode = !mmMultiMode;
+    mmMultiSel.clear();
+    mmSelectedId = null;
+    document.getElementById('mmMultiToggle').classList.toggle('active', mmMultiMode);
+    updateMmMultiBar();
+    drawMindmap();
+    showToast(mmMultiMode ? '多选模式：点击节点进行多选' : '已退出多选模式');
+  });
+  document.getElementById('mmMultiDone').addEventListener('click',()=>{
+    mmMultiMode = false;
+    mmMultiSel.clear();
+    document.getElementById('mmMultiToggle').classList.remove('active');
+    updateMmMultiBar();
+    drawMindmap();
+  });
+  document.getElementById('mmMultiSummary').addEventListener('click',()=>{
+    const sel = mmNodes.filter(n=>mmMultiSel.has(n.id));
+    if (!sel.length) return;
+    const txt = prompt(`为选中的 ${sel.length} 个节点添加概要（留空则删除）：`, '');
+    if (txt===null) return;
+    const v = txt.trim();
+    sel.forEach(n=>{ if (v) n.summary = v; else delete n.summary; });
+    drawMindmap();
+  });
+  document.getElementById('mmMultiMarker').addEventListener('click',()=>{
+    if (!mmMultiSel.size) return;
+    mmMarkerTargets = [...mmMultiSel];
+    document.getElementById('mmMarkerPanel').classList.add('show');
+  });
   document.getElementById('mmDelNode').addEventListener('click',()=>{
     if (mmSelectedId===null || mmSelectedId===0) { showToast('不能删除根节点'); return; }
+    const cur = mmNodes.find(n=>n.id===mmSelectedId);
+    const hasChild = mmNodes.some(n=>n.parent===mmSelectedId);
+    mmAskConfirm(`确定删除节点「${cur?cur.text:''}」${hasChild?'及其所有子节点':''}？`, ()=>{
     // 删除该节点及其后代
     const toDel = new Set([mmSelectedId]);
     let changed = true;
@@ -3740,17 +4141,26 @@ document.addEventListener('DOMContentLoaded', ()=>{
       mmNodes.forEach(n=>{ if(toDel.has(n.parent) && !toDel.has(n.id)){ toDel.add(n.id); changed=true; } });
     }
     mmNodes = mmNodes.filter(n=>!toDel.has(n.id));
+    toDel.forEach(id=>mmCollapsed.delete(id));
+    toDel.forEach(id=>mmMultiSel.delete(id));
+    updateMmMultiBar();
     mmSelectedId = 0;
     drawMindmap();
+    });
   });
   document.getElementById('mmClear').addEventListener('click',()=>{
-    if(!confirm('确定清空思维导图？')) return;
-    const cx = mmCanvas.width/2, cy = mmCanvas.height/2;
+    mmAskConfirm('确定清空思维导图的全部节点？', ()=>{
+      const cx = mmCanvas.width/2, cy = mmCanvas.height/2;
     mmNodes = [{id:0, text:'中心主题', x:cx, y:cy, parent:null}];
     mmNextId = 1; mmSelectedId = 0;
+    mmCollapsed.clear();
+    mmMultiSel.clear();
+    updateMmMultiBar();
     drawMindmap();
+    });
   });
-  // canvas 交互
+  document.getElementById('mmConfirmCancel').addEventListener('click',()=>mmCloseConfirm(false));
+  document.getElementById('mmConfirmOk').addEventListener('click',()=>mmCloseConfirm(true));
   function getCanvasPos(e){
     const rect = mmCanvas.getBoundingClientRect();
     const x = (e.touches?e.touches[0].clientX:e.clientX) - rect.left;
@@ -3765,10 +4175,54 @@ document.addEventListener('DOMContentLoaded', ()=>{
   mmCanvas.addEventListener('mouseup', onMmUp);
   mmCanvas.addEventListener('touchend', onMmUp);
   let mmDownPos = null, mmMoved = false, mmWasSelected = false;
+  let mmPanning = false, mmPanLast = null;
   function onMmDown(e){
     e.preventDefault();
     const {x,y} = getCanvasPos(e);
+    // 点击节点右下角「+」新增子节点；点击「‹」收起；点击数字展开
+    const badge = mmBadgeHitTest(x,y);
+    if (badge){
+      mmDragging = null;
+      mmWasSelected = false;
+      if (badge.type==='add'){
+        mmSelectedId = badge.node.id;
+        drawMindmap();
+        mmAddChild(badge.node.id);
+      } else {
+        if (mmCollapsed.has(badge.node.id)) mmCollapsed.delete(badge.node.id);
+        else mmCollapsed.add(badge.node.id);
+        mmSelectedId = badge.node.id;
+        drawMindmap();
+      }
+      return;
+    }
+    // 点击概要括号右侧文字：编辑该组概要
+    const sumHit = mmSummaryHitTest(x,y);
+    if (sumHit){
+      mmSelectedId = sumHit.nodes[0].id;
+      mmDragging = null;
+      mmWasSelected = false;
+      drawMindmap();
+      editMmSummaryGroup(sumHit.nodes, sumHit.text);
+      return;
+    }
     const node = mmHitTest(x,y);
+    if (mmMultiMode){
+      if (node){
+        if (mmMultiSel.has(node.id)) mmMultiSel.delete(node.id);
+        else mmMultiSel.add(node.id);
+        mmSelectedId = mmMultiSel.has(node.id) ? node.id : null;
+        updateMmMultiBar();
+        drawMindmap();
+      } else {
+        // 空白处拖拽：平移整个导图
+        mmPanning = true;
+        mmPanLast = {x,y};
+        mmDragging = null;
+        mmWasSelected = false;
+      }
+      return;
+    }
     if (node){
       mmWasSelected = (mmSelectedId === node.id);
       mmSelectedId = node.id;
@@ -3780,13 +4234,24 @@ document.addEventListener('DOMContentLoaded', ()=>{
     } else {
       mmWasSelected = false;
       mmSelectedId = null;
+      mmDragging = null;
+      // 空白处拖拽：平移整个导图
+      mmPanning = true;
+      mmPanLast = {x,y};
       drawMindmap();
     }
   }
   function onMmMove(e){
-    if (!mmDragging) return;
+    if (!mmDragging && !mmPanning) return;
     e.preventDefault();
     const {x,y} = getCanvasPos(e);
+    if (mmPanning){
+      const dx = x - mmPanLast.x, dy = y - mmPanLast.y;
+      mmNodes.forEach(n=>{ n.x += dx; n.y += dy; });
+      mmPanLast = {x,y};
+      drawMindmap();
+      return;
+    }
     if (mmDownPos && (Math.abs(x-mmDownPos.x)>3 || Math.abs(y-mmDownPos.y)>3)) mmMoved = true;
     mmDragging.x = x + mmDragOffset.x;
     mmDragging.y = y + mmDragOffset.y;
@@ -3796,11 +4261,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const node = mmDragging;
     const tappedAgain = node && !mmMoved && mmWasSelected;
     mmDragging = null;
+    mmPanning = false;
+    mmPanLast = null;
     mmWasSelected = false;
     // 再次点击已选中的节点 = 编辑文字（手机端无双击事件，用点两次替代）
     if (tappedAgain) editMmNode(node);
   }
   mmCanvas.addEventListener('dblclick',(e)=>{
+    if (mmMultiMode) return;
     const {x,y} = getCanvasPos(e);
     const node = mmHitTest(x,y);
     if (node){
