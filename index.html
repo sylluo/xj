@@ -3103,6 +3103,7 @@ function renderSeasonReview(){
     });
     if (e.mood === 'sad') keyEvents.push({dk, cat:'😔 情绪低谷', text: e.revImprove || e.revGood || '当天心情低落'});
   });
+  keyEvents.reverse();
   const checkRate = quarterDays ? Math.round(quarterChecks/(quarterDays*habitNames.length)*100) : 0;
 
   // 习惯养成曲线（每月的次/周）
