@@ -3147,8 +3147,10 @@ function renderSeasonReview(){
       <div class="sub-fold-head">🕒 关键事件时间线<span class="sub-arrow">▾</span></div>
       <div class="sub-fold-body">${keyEvents.length ? keyEvents.map(t=>`<div class="timeline-item"><div class="timeline-item-date">${t.dk} · ${t.cat}</div>${escapeHtml(t.text)}</div>`).join('') : '<div class="review-detail-empty">本季度暂无关键事件</div>'}</div>
     </div>
-    <div class="chart-title" style="margin-top:10px;">🎯 高频卡点 TOP3</div>
-    ${topStuck.length ? `<div class="stuck-rank">${topStuck.map(([w,c],i)=>`<div class="stuck-rank-item"><span class="stuck-rank-no">${i+1}</span><span class="stuck-rank-word">${escapeHtml(w)}</span><span class="stuck-rank-count num">${c}次</span></div>`).join('')}</div>` : '<div class="review-detail-empty">本季度暂无足够数据</div>'}
+    <div class="sub-fold" data-subfold="seasonStuck">
+      <div class="sub-fold-head">🎯 高频卡点 TOP3<span class="sub-arrow">▾</span></div>
+      <div class="sub-fold-body">${topStuck.length ? `<div class="stuck-rank">${topStuck.map(([w,c],i)=>`<div class="stuck-rank-item"><span class="stuck-rank-no">${i+1}</span><span class="stuck-rank-word">${escapeHtml(w)}</span><span class="stuck-rank-count num">${c}次</span></div>`).join('')}</div>` : '<div class="review-detail-empty">本季度暂无足够数据</div>'}</div>
+    </div>
   `;
 
   if (window.applySubFoldState) window.applySubFoldState();
