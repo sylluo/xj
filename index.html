@@ -411,7 +411,12 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 /* ============ 四象限 ============ */
 .quad-grid { display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px; }
 .quad-card { background:var(--bg-card);border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);border:1px solid var(--border);display:flex;flex-direction:column;min-height:160px; }
-.quad-card .quad-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:4px; }
+.quad-card .quad-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;cursor:pointer; }
+.quad-head-right { display:flex;align-items:center;gap:8px; }
+.quad-fold { font-size:11px;line-height:1;color:var(--text-light);transition:transform .2s; }
+.quad-card.collapsed .quad-fold { transform:rotate(-90deg); }
+.quad-card.collapsed .quad-body { display:none; }
+.quad-card.collapsed { min-height:0; }
 .quad-title { font-size:14px;font-weight:700;color:var(--ink);font-family:'Songti SC',serif;display:flex;align-items:center;gap:6px; }
 .quad-badge { display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:18px;padding:0 5px;border-radius:4px;font-size:11px;font-weight:700;color:#fff;font-family:Arial; }
 .q-q1 { border-top:3px solid #d98076; }
@@ -549,6 +554,13 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .card.rev-fold .collapse-btn .icon { width:15px; height:15px; }
 .card.rev-fold .collapse-body { padding:14px 16px 16px; background:linear-gradient(180deg,rgba(255,255,255,.75) 0%,var(--bg-card) 30%); }
 .card.rev-fold.collapsed .card-title { border-bottom:none; }
+/* 概览内的子板块折叠 */
+.sub-fold { border:1px solid var(--border); border-radius:10px; margin-top:8px; background:#fff; overflow:hidden; }
+.sub-fold-head { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; font-size:13px; font-weight:600; color:var(--text-secondary); background:#f6f9f8; cursor:pointer; user-select:none; }
+.sub-fold-head .sub-arrow { font-size:12px; color:var(--text-light); transition:transform .2s; }
+.sub-fold.collapsed .sub-arrow { transform:rotate(-90deg); }
+.sub-fold-body { padding:8px 10px 10px; }
+.sub-fold.collapsed .sub-fold-body { display:none; }
 
 /* ============ 行动卡 ============ */
 .action-card { background:linear-gradient(135deg,#fff7ec,#fff); border:2px solid var(--accent); border-radius:14px; padding:14px 16px; margin-top:14px; box-shadow:0 4px 16px rgba(232,163,61,.15); }
@@ -620,18 +632,20 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .mm-summary-line { display:inline-block; font-size:11px; line-height:1.5; color:#8a6d2f; background:#fff8e6; border:1px solid #e2c07a; border-radius:6px; padding:1px 6px; margin:2px 0 3px 14px; }
 
 /* 成长标签筛选 */
-.growth-tag-filter { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; padding:8px; background:var(--bg-card); border-radius:10px; border:1px solid var(--border-light); }
+.growth-wrap { background:var(--bg-card); border:1px solid var(--border-light); border-radius:12px; padding:10px 12px 4px; box-shadow:var(--shadow-sm); }
+.growth-tag-filter { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; padding:0 0 8px; background:transparent; border-radius:0; border-bottom:1px dashed var(--border-light); }
 .growth-tag-filter .tag { padding:4px 10px; border-radius:12px; font-size:12px; background:#eef2f5; color:#5c6b77; cursor:pointer; border:none; }
 .growth-tag-filter .tag.active { background:var(--primary); color:#fff; }
 /* 成长按标签分组 */
-.growth-group { background:var(--bg-card); border:1px solid var(--border-light); border-radius:10px; margin-bottom:8px; overflow:hidden; }
-.growth-group-head { display:flex; align-items:center; gap:6px; padding:9px 12px; cursor:pointer; user-select:none; font-size:13px; font-weight:600; color:var(--primary-dark); background:#eef4f1; }
-.growth-group-count { margin-left:auto; font-size:11px; font-weight:500; color:var(--text-light); background:#fff; border-radius:10px; padding:1px 8px; }
+.growth-group { background:transparent; border:none; border-bottom:1px solid var(--border-light); margin-bottom:0; overflow:hidden; }
+.growth-group:last-child { border-bottom:none; }
+.growth-group-head { display:flex; align-items:center; gap:6px; padding:10px 2px; cursor:pointer; user-select:none; font-size:13px; font-weight:600; color:var(--primary-dark); background:transparent; }
+.growth-group-count { margin-left:auto; font-size:11px; font-weight:500; color:var(--text-light); background:#eef4f1; border-radius:10px; padding:1px 8px; }
 .growth-caret { font-size:11px; color:var(--primary); transition:transform .2s; }
 .growth-group.collapsed .growth-caret { transform:rotate(-90deg); }
 .growth-group.collapsed .growth-group-body { display:none; }
-.growth-group-body { padding:8px; }
-.growth-group-body .review-list-item { margin-bottom:6px; }
+.growth-group-body { padding:2px 0 10px; }
+.growth-group-body .review-list-item { margin-bottom:6px; background:#f8fafb; }
 .growth-group-body .review-list-item:last-child { margin-bottom:0; }
 
 /* 反思输入框字号：比小标题(13px)略小 */
@@ -1106,38 +1120,46 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
       <div class="quad-card q-q1">
         <div class="quad-head">
           <div class="quad-title"><span class="quad-badge">Q1</span>重要且紧急</div>
-          <div class="quad-sub">立即处理</div>
+          <div class="quad-head-right"><div class="quad-sub">立即处理</div><span class="quad-fold">▾</span></div>
         </div>
-        <div class="quad-desc">危机事件、紧急问题</div>
-        <div class="quad-list" data-quad="Q1"></div>
-        <button class="quad-add" data-quad="Q1">+ 添加</button>
+        <div class="quad-body">
+          <div class="quad-desc">危机事件、紧急问题</div>
+          <div class="quad-list" data-quad="Q1"></div>
+          <button class="quad-add" data-quad="Q1">+ 添加</button>
+        </div>
       </div>
       <div class="quad-card q-q2">
         <div class="quad-head">
           <div class="quad-title"><span class="quad-badge">Q2</span>重要不紧急</div>
-          <div class="quad-sub">规划执行</div>
+          <div class="quad-head-right"><div class="quad-sub">规划执行</div><span class="quad-fold">▾</span></div>
         </div>
-        <div class="quad-desc">长期规划、能力提升<br>把时间投资在这里，第一象限的"火"才会越来越少</div>
-        <div class="quad-list" data-quad="Q2"></div>
-        <button class="quad-add" data-quad="Q2">+ 添加</button>
+        <div class="quad-body">
+          <div class="quad-desc">长期规划、能力提升<br>把时间投资在这里，第一象限的"火"才会越来越少</div>
+          <div class="quad-list" data-quad="Q2"></div>
+          <button class="quad-add" data-quad="Q2">+ 添加</button>
+        </div>
       </div>
       <div class="quad-card q-q3">
         <div class="quad-head">
           <div class="quad-title"><span class="quad-badge">Q3</span>紧急不重要</div>
-          <div class="quad-sub">授权处理</div>
+          <div class="quad-head-right"><div class="quad-sub">授权处理</div><span class="quad-fold">▾</span></div>
         </div>
-        <div class="quad-desc">不重要会议、电话</div>
-        <div class="quad-list" data-quad="Q3"></div>
-        <button class="quad-add" data-quad="Q3">+ 添加</button>
+        <div class="quad-body">
+          <div class="quad-desc">不重要会议、电话</div>
+          <div class="quad-list" data-quad="Q3"></div>
+          <button class="quad-add" data-quad="Q3">+ 添加</button>
+        </div>
       </div>
       <div class="quad-card q-q4">
         <div class="quad-head">
           <div class="quad-title"><span class="quad-badge">Q4</span>不重要不紧急</div>
-          <div class="quad-sub">尽量不做</div>
+          <div class="quad-head-right"><div class="quad-sub">尽量不做</div><span class="quad-fold">▾</span></div>
         </div>
-        <div class="quad-desc">锁事、消遣、娱乐活动</div>
-        <div class="quad-list" data-quad="Q4"></div>
-        <button class="quad-add" data-quad="Q4">+ 添加</button>
+        <div class="quad-body">
+          <div class="quad-desc">锁事、消遣、娱乐活动</div>
+          <div class="quad-list" data-quad="Q4"></div>
+          <button class="quad-add" data-quad="Q4">+ 添加</button>
+        </div>
       </div>
     </div>
 
@@ -1233,18 +1255,30 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <div class="card-title clickable"><span>📋 数据概览</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
         <div class="collapse-body">
           <div class="review-period-card"><div class="review-period-text" id="weekPeriodText"></div></div>
-          <div class="chart-title" style="font-size:14px;">心情天气条</div>
-          <div class="mood-weather-strip" id="weekMoodWeather"></div>
-          <div class="chart-title" style="font-size:14px;margin-top:8px;">本周亮点</div>
-          <div id="weekHighlights"></div>
-          <div class="chart-title" style="font-size:14px;margin-top:8px;">本周卡点</div>
-          <div id="weekStuck"></div>
-          <div class="chart-title" style="font-size:14px;margin-top:8px;">运动/学习汇总</div>
-          <div id="weekSummary"></div>
-          <div class="chart-title" style="font-size:14px;margin-top:8px;">亲子/美食/新知/灵感</div>
-          <div id="weekTimeline"></div>
-          <div class="chart-title" style="font-size:14px;margin-top:8px;">习惯打卡率</div>
-          <div id="weekHabitProgress"></div>
+          <div class="sub-fold" data-subfold="weekMood">
+            <div class="sub-fold-head">心情天气条<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-body"><div class="mood-weather-strip" id="weekMoodWeather"></div></div>
+          </div>
+          <div class="sub-fold" data-subfold="weekHighlights">
+            <div class="sub-fold-head">本周亮点<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-body" id="weekHighlights"></div>
+          </div>
+          <div class="sub-fold" data-subfold="weekStuck">
+            <div class="sub-fold-head">本周卡点<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-body" id="weekStuck"></div>
+          </div>
+          <div class="sub-fold" data-subfold="weekSummaryFold">
+            <div class="sub-fold-head">运动/学习汇总<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-body" id="weekSummary"></div>
+          </div>
+          <div class="sub-fold" data-subfold="weekTimeline">
+            <div class="sub-fold-head">亲子/美食/新知/灵感<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-body" id="weekTimeline"></div>
+          </div>
+          <div class="sub-fold" data-subfold="weekHabit">
+            <div class="sub-fold-head">习惯打卡率<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-body" id="weekHabitProgress"></div>
+          </div>
         </div>
       </div>
       <div class="card collapsible open rev-fold blue" data-collapse="weekReflection">
@@ -2897,36 +2931,39 @@ function renderWeekReview(){
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${colors[i]};"></div></div>
       <div class="progress-info num">${cnt}/7 ${status}</div></div>`;
   }).join('');
-  // 心情天气条
-  document.getElementById('weekMoodWeather').innerHTML = days.map(day=>{
+  // 心情天气条（周一为起始）
+  document.getElementById('weekMoodWeather').innerHTML = days.map((day,idx)=>{
     const e = day.entry;
-    const wd = weekdayShort[day.d.getDay()];
+    const wd = weekdayShort[idx] || '';
     return `<div class="mw-cell"><div class="mw-cell-label">${wd}</div><div class="mw-cell-emoji">${e&&e.mood?moodMap[e.mood]:'·'}</div><div class="mw-cell-weather">${e&&e.weather?weatherMap[e.weather]:'·'}</div></div>`;
   }).join('');
-  // 亮点
+  // 亮点（按日期倒序）
   const highs = [];
   days.forEach(day=>{ if(day.entry&&day.entry.revGood) highs.push({dk:day.dk,text:day.entry.revGood}); });
+  highs.reverse();
   document.getElementById('weekHighlights').innerHTML = highs.length ? highs.map(h=>`<div class="timeline-item"><div class="timeline-item-date">${h.dk}</div>${escapeHtml(h.text)}</div>`).join('') : '<div class="rs-empty">本周暂无</div>';
-  // 卡点
+  // 卡点（按日期倒序）
   const stucks = [];
   days.forEach(day=>{
     if(day.entry&&day.entry.revImprove) stucks.push({dk:day.dk,text:day.entry.revImprove,type:'改进'});
     if(day.entry&&day.entry.timeWaste) stucks.push({dk:day.dk,text:day.entry.timeWaste,type:'浪费'});
   });
+  stucks.reverse();
   document.getElementById('weekStuck').innerHTML = stucks.length ? stucks.map(s=>`<div class="timeline-item"><div class="timeline-item-date">${s.dk} · ${s.type}</div>${escapeHtml(s.text)}</div>`).join('') : '<div class="rs-empty">本周暂无</div>';
-  // 运动/学习汇总
+  // 运动/学习汇总（按日期倒序）
   let sportMin=0, studyMin=0;
   const sportItems=[], studyItems=[];
   days.forEach(day=>{
     (day.entry?.sportRecords||[]).forEach(r=>{ sportMin += Number(r.duration||0); sportItems.push(`${day.dk} ${r.type} ${r.duration}分钟`); });
     (day.entry?.studyRecords||[]).forEach(r=>{ studyMin += Number(r.duration||0); studyItems.push(`${day.dk} ${r.content||''} ${r.duration}分钟`); });
   });
+  sportItems.reverse(); studyItems.reverse();
   document.getElementById('weekSummary').innerHTML =
     `<div class="timeline-item"><b>🏃 运动总时长：</b>${sportMin}分钟</div>` +
     (sportItems.length?sportItems.map(s=>`<div class="timeline-item">${s}</div>`).join(''):'<div class="rs-empty">无运动</div>') +
     `<div class="timeline-item" style="margin-top:8px;"><b>📖 学习总时长：</b>${studyMin}分钟</div>` +
     (studyItems.length?studyItems.map(s=>`<div class="timeline-item">${s}</div>`).join(''):'<div class="rs-empty">无学习</div>');
-  // 亲子/美食/新知/灵感时间线
+  // 亲子/美食/新知/灵感时间线（按日期倒序）
   const tl = [];
   days.forEach(day=>{
     const e = day.entry; if(!e) return;
@@ -2935,9 +2972,11 @@ function renderWeekReview(){
     if(e.newKnowledge) tl.push({dk:day.dk,cat:'💡 新知',text:e.newKnowledge});
     if(e.inspiration) tl.push({dk:day.dk,cat:'✨ 灵感',text:e.inspiration});
   });
+  tl.reverse();
   document.getElementById('weekTimeline').innerHTML = tl.length ? tl.map(t=>`<div class="timeline-item"><div class="timeline-item-date">${t.dk}</div><b>${t.cat}：</b>${escapeHtml(t.text)}</div>`).join('') : '<div class="rs-empty">本周暂无</div>';
 
   // 加载已保存的周复盘反思
+  if (window.applySubFoldState) window.applySubFoldState();
   loadWeekReflection(weekStart);
 }
 
@@ -3099,14 +3138,19 @@ function renderSeasonReview(){
       <div class="stat-card"><div class="stat-card-num num">${studyCount}</div><div class="stat-card-label">学习记录</div></div>
       <div class="stat-card"><div class="stat-card-num num">${growthCount}</div><div class="stat-card-label">成长记录</div></div>
     </div>
-    <div class="chart-title" style="margin-top:10px;">📈 习惯养成曲线（三个月打卡趋势）</div>
-    <div class="habit-trend-list">${habitCurve}</div>
-    <div class="chart-title" style="margin-top:10px;">🕒 关键事件时间线</div>
-    ${keyEvents.length ? keyEvents.map(t=>`<div class="timeline-item"><div class="timeline-item-date">${t.dk} · ${t.cat}</div>${escapeHtml(t.text)}</div>`).join('') : '<div class="review-detail-empty">本季度暂无关键事件</div>'}
+    <div class="sub-fold" data-subfold="seasonHabitCurve">
+      <div class="sub-fold-head">📈 习惯养成曲线（三个月打卡趋势）<span class="sub-arrow">▾</span></div>
+      <div class="sub-fold-body"><div class="habit-trend-list">${habitCurve}</div></div>
+    </div>
+    <div class="sub-fold" data-subfold="seasonEvents">
+      <div class="sub-fold-head">🕒 关键事件时间线<span class="sub-arrow">▾</span></div>
+      <div class="sub-fold-body">${keyEvents.length ? keyEvents.map(t=>`<div class="timeline-item"><div class="timeline-item-date">${t.dk} · ${t.cat}</div>${escapeHtml(t.text)}</div>`).join('') : '<div class="review-detail-empty">本季度暂无关键事件</div>'}</div>
+    </div>
     <div class="chart-title" style="margin-top:10px;">🎯 高频卡点 TOP3</div>
     ${topStuck.length ? `<div class="stuck-rank">${topStuck.map(([w,c],i)=>`<div class="stuck-rank-item"><span class="stuck-rank-no">${i+1}</span><span class="stuck-rank-word">${escapeHtml(w)}</span><span class="stuck-rank-count num">${c}次</span></div>`).join('')}</div>` : '<div class="review-detail-empty">本季度暂无足够数据</div>'}
   `;
 
+  if (window.applySubFoldState) window.applySubFoldState();
   loadSeasonReflection(year, quarter);
   updateSeasonActionCard(year, quarter);
 }
@@ -3330,7 +3374,7 @@ function renderReviewSection(section){
         </div>`).join('')}</div>
       </div>`;
     }).join('') : '<div class="review-detail-empty">暂无成长记录</div>';
-    body.innerHTML = filterBar + groupsHtml;
+    body.innerHTML = `<div class="growth-wrap">${filterBar}${groupsHtml}</div>`;
   }
   initCollapsible();
 }
@@ -3387,6 +3431,7 @@ function renderMonthReview(){
     if (e.newKnowledge && e.newKnowledge.trim()) timeline.push({dk,cat:'💡 新知',text:e.newKnowledge});
     if (e.inspiration && e.inspiration.trim()) timeline.push({dk,cat:'✨ 灵感',text:e.inspiration});
   });
+  timeline.reverse();
   // 渲染
   const content = `
     <div class="stats-grid compact">
@@ -3395,12 +3440,17 @@ function renderMonthReview(){
       <div class="stat-card"><div class="stat-card-num num">${studyMin}</div><div class="stat-card-label">学习总分钟</div></div>
       <div class="stat-card"><div class="stat-card-num num">${habitDays.reduce((a,b)=>a+b,0)}</div><div class="stat-card-label">习惯打卡次</div></div>
     </div>
-    <div class="chart-title" style="margin-top:10px;">🔤 高频问题词云（需改进 + 浪费时间）</div>
-    ${extractWordCloud(keys) || '<div class="review-detail-empty">本月暂无足够数据生成词云</div>'}
-    <div class="chart-title" style="margin-top:10px;">🧠 认知记录（新知/灵感/书账）</div>
-    ${timeline.length ? timeline.map(t=>`<div class="timeline-item"><div class="timeline-item-date">${t.dk} · ${t.cat}</div>${escapeHtml(t.text)}${t.mindmap?' 🧠':''}</div>`).join('') : '<div class="review-detail-empty">本月暂无认知记录</div>'}
+    <div class="sub-fold" data-subfold="monthWordCloud">
+      <div class="sub-fold-head">🔤 高频问题词云（需改进 + 浪费时间）<span class="sub-arrow">▾</span></div>
+      <div class="sub-fold-body">${extractWordCloud(keys) || '<div class="review-detail-empty">本月暂无足够数据生成词云</div>'}</div>
+    </div>
+    <div class="sub-fold" data-subfold="monthCognition">
+      <div class="sub-fold-head">🧠 认知记录（新知/灵感/书账）<span class="sub-arrow">▾</span></div>
+      <div class="sub-fold-body">${timeline.length ? timeline.map(t=>`<div class="timeline-item"><div class="timeline-item-date">${t.dk} · ${t.cat}</div>${escapeHtml(t.text)}${t.mindmap?' 🧠':''}</div>`).join('') : '<div class="review-detail-empty">本月暂无认知记录</div>'}</div>
+    </div>
   `;
   document.getElementById('monthReviewContent').innerHTML = content;
+  if (window.applySubFoldState) window.applySubFoldState();
   loadMonthReflection(month);
 }
 
@@ -3972,6 +4022,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('.quad-add').forEach(btn=>{
     btn.addEventListener('click',()=>{ quadAddTodo(btn.dataset.quad); });
   });
+  // 象限卡片独立折叠
+  document.addEventListener('click',(e)=>{
+    const head = e.target.closest('.quad-card .quad-head');
+    if(!head) return;
+    head.closest('.quad-card').classList.toggle('collapsed');
+  });
   document.addEventListener('click',(e)=>{
     const del = e.target.closest('.quad-del');
     if(del){
@@ -4278,6 +4334,27 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 
   // ============ 复盘页事件 ============
+  // 概览内的子板块折叠/展开（记忆折叠状态）
+  document.addEventListener('click',(e)=>{
+    const head = e.target.closest('.sub-fold-head');
+    if (!head) return;
+    const fold = head.parentElement;
+    fold.classList.toggle('collapsed');
+    const key = fold.dataset.subfold;
+    if (key){
+      let map = {};
+      try { map = JSON.parse(localStorage.getItem('subFoldState') || '{}'); } catch(err){ map = {}; }
+      map[key] = fold.classList.contains('collapsed');
+      localStorage.setItem('subFoldState', JSON.stringify(map));
+    }
+  });
+  window.applySubFoldState = function(){
+    let map = {};
+    try { map = JSON.parse(localStorage.getItem('subFoldState') || '{}'); } catch(err){ map = {}; }
+    document.querySelectorAll('.sub-fold[data-subfold]').forEach(el=>{
+      el.classList.toggle('collapsed', !!map[el.dataset.subfold]);
+    });
+  };
   document.getElementById('reviewTabs').addEventListener('click',(e)=>{
     const tab = e.target.closest('.review-tab');
     if(tab) renderReviewTab(tab.dataset.tab);
