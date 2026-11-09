@@ -355,6 +355,10 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 
 /* 统计页 */
 .stats-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px; }
+.stats-grid.compact { gap:8px; }
+.stats-grid.compact .stat-card { padding:10px 8px; border-radius:10px; }
+.stats-grid.compact .stat-card-num { font-size:19px; font-family:Arial,'Helvetica Neue',sans-serif; }
+.stats-grid.compact .stat-card-label { font-size:11px; margin-top:2px; }
 .stat-card { background:var(--bg-card);border-radius:12px;padding:18px 12px;text-align:center;box-shadow:var(--shadow-sm);border:1px solid var(--border); }
 .stat-card-num { font-size:32px;font-weight:700;color:var(--primary-dark);font-family:'Songti SC','STSong',serif; }
 .stat-card-label { font-size:12px;color:var(--text-light);margin-top:6px; }
@@ -405,7 +409,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 }
 
 /* ============ 四象限 ============ */
-.quad-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px; }
+.quad-grid { display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px; }
 .quad-card { background:var(--bg-card);border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);border:1px solid var(--border);display:flex;flex-direction:column;min-height:160px; }
 .quad-card .quad-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:4px; }
 .quad-title { font-size:14px;font-weight:700;color:var(--ink);font-family:'Songti SC',serif;display:flex;align-items:center;gap:6px; }
@@ -484,6 +488,10 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .habit-cal-marks .c-bl { bottom:0;left:0; }
 .habit-cal-marks .c-br { bottom:0;right:0; }
 .habit-mark-legend { display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--text-secondary);padding:10px 8px 4px;flex-wrap:wrap; }
+.habit-filter { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding:8px;background:var(--bg-card);border-radius:10px;border:1px solid var(--border-light); }
+.habit-filter-chip { border:1px solid var(--border);background:#fff;color:var(--text-secondary);font-size:12px;padding:5px 11px;border-radius:14px;cursor:pointer;font-family:inherit;line-height:1.4; }
+.habit-filter-chip.active { background:var(--primary-lighter);border-color:var(--primary-light);color:var(--primary-dark);font-weight:600; }
+.habit-filter-chip:active { opacity:.75; }
 
 /* 复盘-周复盘 */
 .review-period-card { background:linear-gradient(135deg,var(--primary-lighter),#fff);border-radius:12px;padding:12px 14px;margin-bottom:12px;border:1px solid var(--primary-light); }
@@ -513,6 +521,18 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .card.collapsible .collapse-body { overflow:hidden; transition:max-height .35s ease, opacity .25s; }
 .card.collapsible.collapsed .collapse-body { max-height:0 !important; opacity:0; padding-top:0; padding-bottom:0; }
 
+/* 复盘页折叠卡片：与写日记页晨间/晚间日记段落同风格 */
+.card.rev-fold { padding:0; overflow:hidden; border-radius:14px; }
+.card.rev-fold .card-title { margin:0; padding:14px 16px; font-size:16px; font-weight:700; letter-spacing:2px; color:#2f5d4f;
+  background:linear-gradient(135deg,#e9f2ee 0%,#d3e7df 55%,#bcdcd0 100%); border-bottom:1px solid var(--border); }
+.card.rev-fold.blue .card-title { color:#2c4a73; background:linear-gradient(135deg,#e0ebf7 0%,#c4d6ea 50%,#a6c0de 100%); }
+.card.rev-fold .card-title::after { display:none; }
+.card.rev-fold .collapse-btn { margin-left:auto; flex-shrink:0; width:26px; height:26px; border-radius:50%;
+  background:rgba(255,255,255,.6); color:inherit; border:none; display:flex; align-items:center; justify-content:center; }
+.card.rev-fold .collapse-btn .icon { width:15px; height:15px; }
+.card.rev-fold .collapse-body { padding:14px 16px 16px; background:linear-gradient(180deg,rgba(255,255,255,.75) 0%,var(--bg-card) 30%); }
+.card.rev-fold.collapsed .card-title { border-bottom:none; }
+
 /* ============ 行动卡 ============ */
 .action-card { background:linear-gradient(135deg,#fff7ec,#fff); border:2px solid var(--accent); border-radius:14px; padding:14px 16px; margin-top:14px; box-shadow:0 4px 16px rgba(232,163,61,.15); }
 .action-card-title { font-size:15px; font-weight:700; color:var(--accent); font-family:'Songti SC',serif; margin-bottom:8px; }
@@ -525,6 +545,41 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .wordcloud .wc-word { display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; color:#5c6b77; background:#eef2f5; }
 .wordcloud .wc-word.high { font-size:15px; font-weight:700; color:var(--accent); background:var(--accent2-light); }
 .wordcloud .wc-word.mid { font-size:13px; font-weight:600; color:var(--primary-dark); background:var(--primary-lighter); }
+
+/* ============ 季复盘：习惯曲线 / 卡点排行 ============ */
+.habit-trend-list { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+.habit-trend { padding:8px 10px; background:#fafbfc; border-radius:10px; border:1px solid var(--border-light); }
+.habit-trend-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:3px; }
+.habit-trend-name { font-size:13px; font-weight:600; color:var(--ink); }
+.habit-trend-tag { font-size:11px; padding:1px 8px; border-radius:10px; }
+.habit-trend-tag.up { color:#2f7d5d; background:#e3f2ea; }
+.habit-trend-tag.down { color:#b45a4f; background:#fbe9e6; }
+.habit-trend-tag.flat { color:#7a8794; background:#eef2f5; }
+.habit-trend-seq { font-size:12px; color:var(--text-secondary); display:flex; flex-wrap:wrap; align-items:center; gap:2px; }
+.habit-trend-seq b { color:var(--primary-dark); font-weight:700; }
+.habit-trend-sep { color:var(--text-light); margin:0 4px; }
+.stuck-rank { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+.stuck-rank-item { display:flex; align-items:center; gap:8px; padding:8px 10px; background:#fafbfc; border-radius:10px; border:1px solid var(--border-light); }
+.stuck-rank-no { width:20px; height:20px; border-radius:50%; background:var(--primary); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.stuck-rank-item:nth-child(1) .stuck-rank-no { background:var(--accent); }
+.stuck-rank-word { flex:1; font-size:14px; font-weight:600; color:var(--ink); }
+.stuck-rank-count { font-size:12px; color:var(--text-light); }
+
+/* ============ 季度关键词卡（首页固定显示 + 季复盘行动卡） ============ */
+.season-pin-card { margin-bottom:14px; padding:14px 16px; border-radius:14px; background:linear-gradient(135deg,#e9f4ef 0%,#cfe6dc 50%,#aed3c4 100%); border:1px solid #bcdcd0; box-shadow:0 2px 10px rgba(91,140,125,.16); }
+.season-pin-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.season-pin-label { font-size:11px; letter-spacing:1px; color:#4f8a79; }
+.season-pin-close { border:none; background:transparent; color:#6fa391; font-size:18px; line-height:1; padding:0 4px; cursor:pointer; }
+.season-pin-theme { font-family:'Songti SC','STSong',serif; font-size:22px; font-weight:700; color:#2b574a; letter-spacing:3px; margin-bottom:8px; }
+.season-pin-sub { font-size:11px; color:#4f8a79; margin-bottom:4px; letter-spacing:1px; }
+.season-pin-list { list-style:none; margin:0; padding:0; }
+.season-pin-list li { display:flex; gap:6px; font-size:13px; color:#35685a; line-height:1.7; padding:2px 0; }
+.season-pin-list .pin-no { flex-shrink:0; width:16px; height:16px; border-radius:50%; background:rgba(47,93,79,.14); color:#2f5d4f; font-size:10px; display:flex; align-items:center; justify-content:center; margin-top:3px; }
+.season-pin-list .pin-empty { color:#6fa391; }
+.season-action-theme { font-family:'Songti SC','STSong',serif; font-size:20px; font-weight:700; color:var(--accent); letter-spacing:2px; }
+.season-action-quarter { font-size:11px; color:var(--text-light); margin:2px 0 6px; }
+.season-action-list { margin:0; padding-left:18px; }
+.season-action-list li { font-size:13px; line-height:1.8; color:var(--text); }
 
 /* ============ 回顾页 4 个 Tab ============ */
 .review-section-tabs { display:flex; gap:2px; background:#f3f6f8; padding:4px; border-radius:12px; margin-bottom:12px; border:1px solid var(--border); overflow-x:auto; position:sticky; top:0; z-index:90; box-shadow:0 4px 12px rgba(80,100,120,0.08); }
@@ -641,6 +696,16 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <div class="cal-days" id="calDays"></div>
         <button class="cal-today-btn" id="calTodayBtn">回到今天</button>
       </div>
+    </div>
+    <!-- 季度关键词 + 3 件大事（季复盘保存后可固定到首页，季度内每天显示） -->
+    <div class="season-pin-card" id="seasonPinCard" style="display:none;">
+      <div class="season-pin-head">
+        <span class="season-pin-label" id="seasonPinLabel">本季度关键词</span>
+        <button class="season-pin-close" id="seasonPinClose" title="取消固定">×</button>
+      </div>
+      <div class="season-pin-theme" id="seasonPinTheme"></div>
+      <div class="season-pin-sub">3 件大事</div>
+      <ul class="season-pin-list" id="seasonPinActions"></ul>
     </div>
     <style>
     .daily-quote{margin-bottom:14px;padding:14px 18px;background:linear-gradient(135deg,#ffedc0 0%,#ffd98a 55%,#ffc64d 100%);border-radius:12px;border:none;position:relative;box-shadow:0 2px 10px rgba(232,163,61,0.18);}
@@ -1116,6 +1181,12 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 
     <!-- 习惯养成 -->
     <div class="review-panel active" data-panel="habit">
+      <div class="habit-filter" id="habitFilter">
+        <button class="habit-filter-chip active" data-h="0">🌅 早起</button>
+        <button class="habit-filter-chip active" data-h="1">📖 阅读</button>
+        <button class="habit-filter-chip active" data-h="2">🏃 运动</button>
+        <button class="habit-filter-chip active" data-h="3">📚 学习</button>
+      </div>
       <div id="habitCalContainer"></div>
     </div>
 
@@ -1126,12 +1197,10 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <div id="weekReviewLabel" style="flex:1;text-align:center;font-size:14px;color:var(--text-secondary);line-height:32px;"></div>
         <button class="cal-nav-btn" id="weekReviewNext"><svg class="icon"><use href="#i-arrow-right"></use></svg></button>
       </div>
-      <div class="card collapsible open" data-collapse="weekOverview">
+      <div class="card collapsible open rev-fold" data-collapse="weekOverview">
         <div class="card-title clickable"><span>📋 数据概览</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
         <div class="collapse-body">
           <div class="review-period-card"><div class="review-period-text" id="weekPeriodText"></div></div>
-          <div class="chart-title" style="font-size:14px;">习惯打卡率</div>
-          <div id="weekHabitProgress" style="margin-bottom:14px;"></div>
           <div class="chart-title" style="font-size:14px;">心情天气条</div>
           <div class="mood-weather-strip" id="weekMoodWeather"></div>
           <div class="chart-title" style="font-size:14px;margin-top:8px;">本周亮点</div>
@@ -1142,34 +1211,42 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
           <div id="weekSummary"></div>
           <div class="chart-title" style="font-size:14px;margin-top:8px;">亲子/美食/新知/灵感</div>
           <div id="weekTimeline"></div>
+          <div class="chart-title" style="font-size:14px;margin-top:8px;">习惯打卡率</div>
+          <div id="weekHabitProgress"></div>
         </div>
       </div>
-      <div class="card collapsible open" data-collapse="weekReflection">
+      <div class="card collapsible open rev-fold blue" data-collapse="weekReflection">
         <div class="card-title clickable"><span>💭 深度反思</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
         <div class="collapse-body">
           <div class="reflection-block">
             <div class="reflection-q">1. 本周最有成就感的3件事是什么？</div>
-            <textarea id="refAchievement" placeholder="正向赋能，避免自我批判开场..."></textarea>
+            <div class="reflection-hint">正向赋能，避免自我批判开场</div>
+            <textarea id="refAchievement"></textarea>
           </div>
           <div class="reflection-block">
             <div class="reflection-q">2. 本周最浪费时间的是什么？哪件事其实可以不做？</div>
-            <textarea id="refWaste" placeholder="从事实找根因，不是泛泛说'我拖延'..."></textarea>
+            <div class="reflection-hint">从事实找根因，不是泛泛说"我拖延"</div>
+            <textarea id="refWaste"></textarea>
           </div>
           <div class="reflection-block">
             <div class="reflection-q">3. 哪个习惯坚持得最好？哪个习惯总中断？</div>
-            <textarea id="refHabit" placeholder="发现习惯的'触发场景'..."></textarea>
+            <div class="reflection-hint">发现习惯的"触发场景"（比如"每次加班回来就不想运动"）</div>
+            <textarea id="refHabit"></textarea>
           </div>
           <div class="reflection-block">
             <div class="reflection-q">4. 本周情绪最低落/内耗最严重的是哪天？当时发生了什么？</div>
-            <textarea id="refEmotion" placeholder="识别情绪触发点，客观描述..."></textarea>
+            <div class="reflection-hint">识别情绪触发点，不是简单说"他心情不好"，客观描述发生的事情，不带主观判断</div>
+            <textarea id="refEmotion"></textarea>
           </div>
           <div class="reflection-block">
             <div class="reflection-q">5. 本周做的事和我想成为的人一致吗？</div>
-            <textarea id="refConsistent" placeholder="以终为始，锚定方向..."></textarea>
+            <div class="reflection-hint">以终为始，锚定方向</div>
+            <textarea id="refConsistent"></textarea>
           </div>
           <div class="reflection-block">
             <div class="reflection-q">6. 【行动】下周我要：①继续保持___？②停止做___？③开始尝试___？</div>
-            <textarea id="refAction" placeholder="Keep / Stop / Start 各 1 条，具体可执行..."></textarea>
+            <div class="reflection-hint">闭环到下周行动，Keep/Stop/Start 各 1 条，具体可执行的，不贪多</div>
+            <textarea id="refAction"></textarea>
           </div>
           <div class="reflection-block">
             <div class="reflection-q">标签</div>
@@ -1206,7 +1283,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <div id="monthReviewLabel" style="flex:1;text-align:center;font-size:14px;color:var(--text-secondary);line-height:32px;"></div>
         <button class="cal-nav-btn" id="monthReviewNext"><svg class="icon"><use href="#i-arrow-right"></use></svg></button>
       </div>
-      <div class="card collapsible open" data-collapse="monthOverview">
+      <div class="card collapsible open rev-fold" data-collapse="monthOverview">
         <div class="card-title clickable"><span>📆 月度汇总</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
         <div class="collapse-body" id="monthOverviewBody">
           <div id="monthReviewContent">
@@ -1214,7 +1291,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
           </div>
         </div>
       </div>
-      <div class="card collapsible open" data-collapse="monthReflection">
+      <div class="card collapsible open rev-fold blue" data-collapse="monthReflection">
         <div class="card-title clickable"><span>💭 月度深度反思</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
         <div class="collapse-body">
           <div class="reflection-block"><div class="reflection-q">1. 月初我对这个月的期待/核心目标是什么？实际完成了多少？</div><div class="reflection-hint">回顾目标，对比结果</div><textarea id="mrGoal"></textarea></div>
@@ -1240,13 +1317,35 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <div id="seasonReviewLabel" style="flex:1;text-align:center;font-size:14px;color:var(--text-secondary);line-height:32px;"></div>
         <button class="cal-nav-btn" id="seasonReviewNext"><svg class="icon"><use href="#i-arrow-right"></use></svg></button>
       </div>
-      <div class="card collapsible open" data-collapse="seasonOverview">
-        <div class="card-title clickable"><span>🗓️ 季度汇总</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
+      <div class="card collapsible open rev-fold" data-collapse="seasonOverview">
+        <div class="card-title clickable"><span>📋 季度数据概览</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
         <div class="collapse-body" id="seasonOverviewBody">
           <div id="seasonReviewContent">
             <div class="review-detail-empty">请选择季度查看季复盘</div>
           </div>
         </div>
+      </div>
+      <div class="card collapsible open rev-fold blue" data-collapse="seasonReflection">
+        <div class="card-title clickable"><span>💭 季度深度反思</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"></use></svg></button></div>
+        <div class="collapse-body">
+          <div class="reflection-block"><div class="reflection-q">1. 三个月前我对这个季度的期待是什么？现在看，完成度如何？偏差在哪里？</div><div class="reflection-hint">长周期目标校准</div><textarea id="srGoal"></textarea></div>
+          <div class="reflection-block"><div class="reflection-q">2. 这三个月我最大的成长/变化是什么？（能力上、认知上、关系上、身体状态上）</div><div class="reflection-hint">看见身份层面的转变</div><textarea id="srGrowth"></textarea></div>
+          <div class="reflection-block"><div class="reflection-q">3. 这三个月最消耗我的人/事/行为模式是什么？我可以如何远离/切断/重构？</div><div class="reflection-hint">识别内耗源，季度级要敢于做减法</div><textarea id="srDrain"></textarea></div>
+          <div class="reflection-block"><div class="reflection-q">4. 哪些核心习惯已经真正变成我的一部分？哪些"想要养成"的习惯一直停留在口头？为什么？</div><div class="reflection-hint">区分"真习惯"和"伪愿望"</div><textarea id="srHabit"></textarea></div>
+          <div class="reflection-block"><div class="reflection-q">5. 这三个月读过的书/学过的东西里，真正改变了我行为的是什么？大部分内容为什么没用上？</div><div class="reflection-hint">反思学习的有效性</div><textarea id="srLearning"></textarea></div>
+          <div class="reflection-block"><div class="reflection-q">6. 【方向】下季度我的一个关键词/主题是什么？（如：聚焦、健康、断舍离、勇气）</div><div class="reflection-hint">用一个词锚定下季度</div><textarea id="srTheme"></textarea></div>
+          <div class="reflection-block"><div class="reflection-q">7. 【行动】下季度我要完成的3件大事是什么？具体衡量标准（怎么算做成了）：</div><div class="reflection-hint">季度OKR，3件足够，多了散焦</div><textarea id="srAction"></textarea></div>
+          <button class="save-btn" id="saveSeasonReflection" style="margin-top:8px;"><svg class="icon"><use href="#i-save"></use></svg>保存季复盘</button>
+        </div>
+      </div>
+      <div class="action-card" id="seasonActionCard" style="display:none;">
+        <div class="action-card-title">📌 下季度关键词与 3 件大事</div>
+        <div class="action-card-body">
+          <div class="season-action-theme" id="seasonActionTheme"></div>
+          <div class="season-action-quarter" id="seasonActionQuarter"></div>
+          <ol class="season-action-list" id="seasonActionList"></ol>
+        </div>
+        <button class="save-btn action-sync-btn" id="pinSeasonCard">📌 设为季度内首页固定显示</button>
       </div>
     </div>
 
@@ -1288,11 +1387,12 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
   <div class="mindmap-body">
     <div class="mindmap-toolbar">
       <button id="mmAddNode" title="添加子节点">＋ 子节点</button>
+      <button id="mmEditNode" title="编辑节点文字">✏️ 编辑</button>
       <button id="mmDelNode" title="删除节点">🗑 删除</button>
       <button id="mmClear" title="清空">清空</button>
     </div>
     <canvas class="mindmap-canvas" id="mindmapCanvas"></canvas>
-    <div class="mindmap-hint">点击节点选中；双击编辑文字；拖动节点调整位置；工具栏添加/删除子节点</div>
+    <div class="mindmap-hint">点节点选中；再点一次同一节点可编辑文字；拖动可移动位置</div>
   </div>
 </div>
 
@@ -1373,6 +1473,7 @@ let reviewCurrentTab = 'habit';
 let weekReviewOffset = 0;
 let monthReviewOffset = 0;
 let seasonReviewOffset = 0;
+let habitFilterOn = [true,true,true,true];
 let selectedRefTags = [];
 
 const habitNames = ['早起','阅读','运动','学习'];
@@ -2483,7 +2584,7 @@ function renderHabitCalendar(){
     const daysInPrev = new Date(y,m,0).getDate();
     const todayKey = dateKey(now);
     html += `<div class="habit-calendar"><div class="habit-cal-month num">${y}年${m+1}月</div>
-      <div class="habit-mark-legend"><span>🌅 早起</span><span>📖 阅读</span><span>🏃 运动</span><span>📚 学习</span></div>
+      <div class="habit-mark-legend">${habitNames.map((n,i)=> habitFilterOn[i] ? `<span>${habitIcons[i]} ${n}</span>` : '').join('')}</div>
       <div class="habit-cal-grid">
         <div class="habit-cal-weekday">一</div><div class="habit-cal-weekday">二</div><div class="habit-cal-weekday">三</div>
         <div class="habit-cal-weekday">四</div><div class="habit-cal-weekday">五</div><div class="habit-cal-weekday">六</div><div class="habit-cal-weekday">日</div>`;
@@ -2493,7 +2594,7 @@ function renderHabitCalendar(){
       const e = entries[dk];
       const h = e ? (e.habits||[false,false,false,false]) : [false,false,false,false];
       let cornersHtml = '';
-      for (let hi=0;hi<4;hi++){ if (h[hi]) cornersHtml += `<span class="corner ${corners[hi]}">${habitIcons[hi]}</span>`; }
+      for (let hi=0;hi<4;hi++){ if (h[hi] && habitFilterOn[hi]) cornersHtml += `<span class="corner ${corners[hi]}">${habitIcons[hi]}</span>`; }
       const cls=['habit-cal-day'];
       if (dk===todayKey) cls.push('today');
       html += `<div class="${cls.join(' ')}" title="${dk}">${d}<div class="habit-cal-marks">${cornersHtml}</div></div>`;
@@ -2650,42 +2751,183 @@ function renderMonthReview(){
   `;
 }
 
-function renderSeasonReview(){
+function currentSeason(){
   const now = today();
   const q = Math.floor(now.getMonth()/3) + seasonReviewOffset;
-  const baseYear = now.getFullYear();
-  let year = baseYear, quarter = q;
+  let year = now.getFullYear(), quarter = q;
   while (quarter<0){ quarter+=4; year--; }
   while (quarter>3){ quarter-=4; year++; }
+  return { year, quarter };
+}
+
+function renderSeasonReview(){
+  const { year, quarter } = currentSeason();
   const startMonth = quarter*3;
   document.getElementById('seasonReviewLabel').textContent = `${year}年 Q${quarter+1}`;
-  const months = [startMonth, startMonth+1, startMonth+2];
-  let entries2=[];
-  months.forEach(mm=>{
-    const m = mkDate(year, mm+1, 1);
+
+  // 逐月统计
+  const monthStats = [];
+  const quarterKeys = [];
+  let quarterDays = 0, quarterChecks = 0;
+  for (let i=0;i<3;i++){
+    const mm = startMonth+i;
     const dim = new Date(year, mm+1, 0).getDate();
+    const habitCounts = [0,0,0,0];
+    let checks = 0;
     for (let d=1;d<=dim;d++){
       const dk = dateKey(mkDate(year, mm+1, d));
-      if (entries[dk]) entries2.push(entries[dk]);
+      const e = entries[dk];
+      if (!e) continue;
+      quarterKeys.push(dk);
+      (e.habits||[]).forEach((v,j)=>{ if(v){ habitCounts[j]++; checks++; } });
     }
+    monthStats.push({label:(mm+1)+'月', dim, habitCounts});
+    quarterDays += dim;
+    quarterChecks += checks;
+  }
+  // 总数
+  let sportCount=0, studyCount=0, growthCount=0;
+  const keyEvents = [];
+  quarterKeys.forEach(dk=>{
+    const e = entries[dk];
+    sportCount += (e.sportRecords||[]).length;
+    studyCount += (e.studyRecords||[]).length;
+    growthCount += (e.growthRecords||[]).length;
+    // 关键事件：标记为重要的成长记录 / 重大成就 / 情绪低谷
+    (e.growthRecords||[]).forEach(r=>{
+      const tags = r.tags||[];
+      if (tags.includes('重要') || tags.includes('小成就') || tags.includes('突破舒适区')){
+        const cat = tags.includes('小成就') ? '🏆 重大成就' : (tags.includes('突破舒适区') ? '🚀 突破舒适区' : '⭐ 重要成长');
+        keyEvents.push({dk, cat, text: r.content});
+      }
+    });
+    if (e.mood === 'sad') keyEvents.push({dk, cat:'😔 情绪低谷', text: e.revImprove || e.revGood || '当天心情低落'});
   });
-  let studyMin=0, sportMin=0;
-  entries2.forEach(e=>{
-    (e.studyRecords||[]).forEach(r=>{ studyMin += Number(r.duration||0); });
-    (e.sportRecords||[]).forEach(r=>{ sportMin += Number(r.duration||0); });
+  const checkRate = quarterDays ? Math.round(quarterChecks/(quarterDays*habitNames.length)*100) : 0;
+
+  // 习惯养成曲线（每月的次/周）
+  const habitCurve = habitNames.map((name,i)=>{
+    const vals = monthStats.map(ms=>{
+      const cnt = ms.habitCounts[i];
+      return { cnt, perWeek: Math.round(cnt/ms.dim*7*10)/10 };
+    });
+    const first = vals[0].perWeek, last = vals[vals.length-1].perWeek;
+    const trend = last>first ? '↑ 进步' : (last<first ? '↓ 退步' : '→ 持平');
+    const cls = last>first ? 'up' : (last<first ? 'down' : 'flat');
+    return `<div class="habit-trend">
+      <div class="habit-trend-head"><span class="habit-trend-name">${name}</span><span class="habit-trend-tag ${cls}">${trend}</span></div>
+      <div class="habit-trend-seq">${vals.map((v,k)=>`${monthStats[k].label} <b class="num">${v.perWeek}</b>次/周`).join('<span class="habit-trend-sep">→</span>')}</div>
+    </div>`;
+  }).join('');
+
+  // 高频卡点 TOP3（需改进 + 浪费时间）
+  const counter = {};
+  const re = /[\s，。！？、；：「」"'.!?;:·,\-—\/()（）【】\[\]]+/g;
+  quarterKeys.forEach(dk=>{
+    const e = entries[dk];
+    const pool = [e.revImprove, e.timeWaste].filter(Boolean).join(' ');
+    if (!pool) return;
+    pool.split(re).forEach(w=>{ if (w.length>=2) counter[w] = (counter[w]||0)+1; });
   });
-  const habitDays = [0,0,0,0];
-  entries2.forEach(e=>{ (e.habits||[]).forEach((v,i)=>{ if(v) habitDays[i]++; }); });
+  const topStuck = Object.entries(counter).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0])).slice(0,3);
+
   document.getElementById('seasonReviewContent').innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-card-num num">${entries2.length}</div><div class="stat-card-label">记录天数</div></div>
-      <div class="stat-card"><div class="stat-card-num num">${studyMin}</div><div class="stat-card-label">学习总分钟</div></div>
-      <div class="stat-card"><div class="stat-card-num num">${sportMin}</div><div class="stat-card-label">运动总分钟</div></div>
-      <div class="stat-card"><div class="stat-card-num num">${Math.round(entries2.length/90*100)}%</div><div class="stat-card-label">记录率</div></div>
+    <div class="stats-grid compact">
+      <div class="stat-card"><div class="stat-card-num num">${checkRate}%</div><div class="stat-card-label">总打卡率</div></div>
+      <div class="stat-card"><div class="stat-card-num num">${sportCount}</div><div class="stat-card-label">运动记录</div></div>
+      <div class="stat-card"><div class="stat-card-num num">${studyCount}</div><div class="stat-card-label">学习记录</div></div>
+      <div class="stat-card"><div class="stat-card-num num">${growthCount}</div><div class="stat-card-label">成长记录</div></div>
     </div>
-    <div class="chart-title" style="margin-top:8px;">习惯打卡天数</div>
-    ${habitNames.map((n,i)=>`<div class="progress-item"><div class="progress-label">${n}</div><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(habitDays[i]/90*100)}%;background:#5b8c7d;"></div></div><div class="progress-info num">${habitDays[i]}天</div></div>`).join('')}
+    <div class="chart-title" style="margin-top:10px;">📈 习惯养成曲线（三个月打卡趋势）</div>
+    <div class="habit-trend-list">${habitCurve}</div>
+    <div class="chart-title" style="margin-top:10px;">🕒 关键事件时间线</div>
+    ${keyEvents.length ? keyEvents.map(t=>`<div class="timeline-item"><div class="timeline-item-date">${t.dk} · ${t.cat}</div>${escapeHtml(t.text)}</div>`).join('') : '<div class="review-detail-empty">本季度暂无关键事件</div>'}
+    <div class="chart-title" style="margin-top:10px;">🎯 高频卡点 TOP3</div>
+    ${topStuck.length ? `<div class="stuck-rank">${topStuck.map(([w,c],i)=>`<div class="stuck-rank-item"><span class="stuck-rank-no">${i+1}</span><span class="stuck-rank-word">${escapeHtml(w)}</span><span class="stuck-rank-count num">${c}次</span></div>`).join('')}</div>` : '<div class="review-detail-empty">本季度暂无足够数据</div>'}
   `;
+
+  loadSeasonReflection(year, quarter);
+  updateSeasonActionCard(year, quarter);
+}
+
+const SEASON_REF_IDS = ['srGoal','srGrowth','srDrain','srHabit','srLearning','srTheme','srAction'];
+function seasonReflectionKey(year, quarter){ return 'sr_'+year+'_Q'+(quarter+1); }
+function loadSeasonReflection(year, quarter){
+  const data = JSON.parse(localStorage.getItem(seasonReflectionKey(year, quarter))||'{}');
+  SEASON_REF_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) el.value = data[id]||''; });
+}
+function saveSeasonReflection(){
+  const { year, quarter } = currentSeason();
+  const data = {};
+  SEASON_REF_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) data[id] = el.value; });
+  localStorage.setItem(seasonReflectionKey(year, quarter), JSON.stringify(data));
+  showToast('💭 季复盘已保存');
+  updateSeasonActionCard(year, quarter);
+}
+
+// 季复盘行动卡：关键词 + 3 件大事（内容面向下一季度）
+function seasonTarget(year, quarter){
+  let y = year, q = quarter+1;
+  if (q>3){ q = 0; y++; }
+  return { year: y, quarter: q };
+}
+function seasonPinData(){
+  try { return JSON.parse(localStorage.getItem('seasonPin')||'null'); } catch(e){ return null; }
+}
+function splitActionLines(text){
+  return (text||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+}
+function updateSeasonActionCard(year, quarter){
+  const data = JSON.parse(localStorage.getItem(seasonReflectionKey(year, quarter))||'{}');
+  const theme = (data.srTheme||'').trim();
+  const action = (data.srAction||'').trim();
+  const card = document.getElementById('seasonActionCard');
+  if (!card) return;
+  if (!theme && !action){ card.style.display = 'none'; return; }
+  const target = seasonTarget(year, quarter);
+  card.style.display = 'block';
+  document.getElementById('seasonActionTheme').textContent = theme || '（未填写关键词）';
+  document.getElementById('seasonActionQuarter').textContent = `固定显示于 ${target.year}年 Q${target.quarter+1} 的首页`;
+  const items = splitActionLines(action);
+  document.getElementById('seasonActionList').innerHTML = items.length
+    ? items.map(t=>`<li>${escapeHtml(t)}</li>`).join('')
+    : '<li>（未填写 3 件大事）</li>';
+  const pin = seasonPinData();
+  const pinned = pin && pin.year===target.year && pin.quarter===target.quarter;
+  const btn = document.getElementById('pinSeasonCard');
+  btn.textContent = pinned ? '✅ 已固定到首页（点击取消）' : '📌 设为季度内首页固定显示';
+}
+function renderSeasonPin(){
+  const card = document.getElementById('seasonPinCard');
+  if (!card) return;
+  const pin = seasonPinData();
+  if (!pin){ card.style.display = 'none'; return; }
+  const now = today();
+  const curQuarter = Math.floor(now.getMonth()/3);
+  if (now.getFullYear()!==pin.year || curQuarter!==pin.quarter){ card.style.display = 'none'; return; }
+  document.getElementById('seasonPinLabel').textContent = `${pin.year}年 Q${pin.quarter+1} 季度关键词`;
+  document.getElementById('seasonPinTheme').textContent = pin.theme || '（未填写关键词）';
+  const items = splitActionLines(pin.action);
+  document.getElementById('seasonPinActions').innerHTML = items.length
+    ? items.map((t,i)=>`<li><span class="pin-no">${i+1}</span><span>${escapeHtml(t)}</span></li>`).join('')
+    : '<li class="pin-empty">（未填写 3 件大事）</li>';
+  card.style.display = '';
+}
+function toggleSeasonPin(){
+  const { year, quarter } = currentSeason();
+  const target = seasonTarget(year, quarter);
+  const data = JSON.parse(localStorage.getItem(seasonReflectionKey(year, quarter))||'{}');
+  const pin = seasonPinData();
+  const pinned = pin && pin.year===target.year && pin.quarter===target.quarter;
+  if (pinned){
+    localStorage.removeItem('seasonPin');
+    showToast('已取消首页固定显示');
+  } else {
+    localStorage.setItem('seasonPin', JSON.stringify({year: target.year, quarter: target.quarter, theme: data.srTheme||'', action: data.srAction||''}));
+    showToast(`📌 已固定到首页（${target.year}年 Q${target.quarter+1}）`);
+  }
+  updateSeasonActionCard(year, quarter);
+  renderSeasonPin();
 }
 
 function renderReviewTab(tab){
@@ -2757,10 +2999,8 @@ function renderReviewSection(section){
   }
   todayWrap.style.display = 'none';
   body.style.display = '';
-  // 书账/学习按日期升序（内容按日追加），成长按日期倒序（最近在前）
-  const keys = section==='growth'
-    ? Object.keys(entries).sort().reverse()
-    : Object.keys(entries).sort();
+  // 书账/学习/成长均按日期降序（最近在前）
+  const keys = Object.keys(entries).sort().reverse();
   if (section==='book'){
     const items = [];
     keys.forEach(dk=>{
@@ -2829,11 +3069,10 @@ function extractWordCloud(keys){
       }
     });
   });
-  const items = Object.entries(counter).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const items = Object.entries(counter).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0])).slice(0,20);
   if (!items.length) return '';
-  const max = items[0][1], min = items[items.length-1][1];
   return '<div class="wordcloud">' + items.map(([w,c])=>{
-    const cls = c>=5?'high':(c>=3?'mid':'');
+    const cls = c>3?'high':(c===3?'mid':'');
     return `<span class="wc-word ${cls}" title="${c}次">${escapeHtml(w)} ×${c}</span>`;
   }).join('') + '</div>';
 }
@@ -2869,7 +3108,7 @@ function renderMonthReview(){
   });
   // 渲染
   const content = `
-    <div class="stats-grid">
+    <div class="stats-grid compact">
       <div class="stat-card"><div class="stat-card-num num">${keys.length}</div><div class="stat-card-label">写日记天数</div></div>
       <div class="stat-card"><div class="stat-card-num num">${sportMin}</div><div class="stat-card-label">运动总分钟</div></div>
       <div class="stat-card"><div class="stat-card-num num">${studyMin}</div><div class="stat-card-label">学习总分钟</div></div>
@@ -2991,6 +3230,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   loadEntry();
   refreshWriteView();
   renderDailyQuote();
+  renderSeasonPin();
   scrollTo(0,0);
   reviewSelectedDate = dateKey(currentDate);
   window._reviewLoaded = false;
@@ -3267,8 +3507,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
       document.getElementById(page).classList.add('active');
       // 回顾/复盘页隐藏顶部大标题
       const header = document.querySelector('.app-header');
-      if (header) header.style.display = (page==='pageReview'||page==='pageStats') ? 'none' : '';
+      if (header) header.style.display = (page==='pageReview'||page==='pageStats'||page==='pageTime') ? 'none' : '';
       window.scrollTo({top:0,behavior:'auto'});
+      if(page==='pageWrite'){
+        renderSeasonPin();
+      }
       if(page==='pageTime'){
         // 切换到时间管理页时，以写日记页当前日期为准展示，保证今日重点的象限同步可见
         timeDate = currentDate;
@@ -3461,6 +3704,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('mindmapClose').addEventListener('click', closeMindmap);
   document.getElementById('mindmapSave').addEventListener('click', saveMindmap);
   // 工具栏
+  function editMmNode(node){
+    if (!node) return;
+    const txt = prompt('编辑节点文字：', node.text);
+    if (txt !== null && txt.trim()) { node.text = txt.trim(); drawMindmap(); }
+  }
   document.getElementById('mmAddNode').addEventListener('click',()=>{
     if (mmSelectedId===null) return;
     const parent = mmNodes.find(n=>n.id===mmSelectedId);
@@ -3475,6 +3723,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     mmNodes.push(newNode);
     mmSelectedId = newNode.id;
     drawMindmap();
+    // 新增后直接进入改名，避免手机端找不到编辑入口
+    editMmNode(newNode);
+  });
+  document.getElementById('mmEditNode').addEventListener('click',()=>{
+    if (mmSelectedId===null){ showToast('请先点选一个节点'); return; }
+    editMmNode(mmNodes.find(n=>n.id===mmSelectedId));
   });
   document.getElementById('mmDelNode').addEventListener('click',()=>{
     if (mmSelectedId===null || mmSelectedId===0) { showToast('不能删除根节点'); return; }
@@ -3510,12 +3764,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   mmCanvas.addEventListener('touchmove', onMmMove, {passive:false});
   mmCanvas.addEventListener('mouseup', onMmUp);
   mmCanvas.addEventListener('touchend', onMmUp);
-  let mmDownPos = null, mmMoved = false;
+  let mmDownPos = null, mmMoved = false, mmWasSelected = false;
   function onMmDown(e){
     e.preventDefault();
     const {x,y} = getCanvasPos(e);
     const node = mmHitTest(x,y);
     if (node){
+      mmWasSelected = (mmSelectedId === node.id);
       mmSelectedId = node.id;
       mmDragging = node;
       mmDragOffset = {x: node.x-x, y: node.y-y};
@@ -3523,6 +3778,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       mmMoved = false;
       drawMindmap();
     } else {
+      mmWasSelected = false;
       mmSelectedId = null;
       drawMindmap();
     }
@@ -3537,10 +3793,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     drawMindmap();
   }
   function onMmUp(e){
-    if (mmDragging && !mmMoved){
-      // 视为点击
-    }
+    const node = mmDragging;
+    const tappedAgain = node && !mmMoved && mmWasSelected;
     mmDragging = null;
+    mmWasSelected = false;
+    // 再次点击已选中的节点 = 编辑文字（手机端无双击事件，用点两次替代）
+    if (tappedAgain) editMmNode(node);
   }
   mmCanvas.addEventListener('dblclick',(e)=>{
     const {x,y} = getCanvasPos(e);
@@ -3556,6 +3814,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const tab = e.target.closest('.review-tab');
     if(tab) renderReviewTab(tab.dataset.tab);
   });
+  // 习惯养成：选择性显示（至少保留一个习惯）
+  document.getElementById('habitFilter').addEventListener('click',(e)=>{
+    const chip = e.target.closest('.habit-filter-chip');
+    if(!chip) return;
+    const i = Number(chip.dataset.h);
+    const activeCount = habitFilterOn.filter(Boolean).length;
+    if (habitFilterOn[i] && activeCount===1) return;
+    habitFilterOn[i] = !habitFilterOn[i];
+    chip.classList.toggle('active', habitFilterOn[i]);
+    renderHabitCalendar();
+  });
   document.getElementById('weekReviewPrev').addEventListener('click',()=>{ weekReviewOffset--; renderWeekReview(); });
   document.getElementById('weekReviewNext').addEventListener('click',()=>{ weekReviewOffset++; renderWeekReview(); });
   document.getElementById('monthReviewPrev').addEventListener('click',()=>{ monthReviewOffset--; renderMonthReview(); });
@@ -3564,6 +3833,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('seasonReviewNext').addEventListener('click',()=>{ seasonReviewOffset++; renderSeasonReview(); });
   document.getElementById('saveReflection').addEventListener('click', saveWeekReflection);
   document.getElementById('saveMonthReflection').addEventListener('click', saveMonthReflection);
+  document.getElementById('saveSeasonReflection').addEventListener('click', saveSeasonReflection);
+  document.getElementById('pinSeasonCard').addEventListener('click', toggleSeasonPin);
+  document.getElementById('seasonPinClose').addEventListener('click', ()=>{
+    localStorage.removeItem('seasonPin');
+    renderSeasonPin();
+    showToast('已取消首页固定显示');
+  });
   document.getElementById('syncWeekAction').addEventListener('click', syncWeekAction);
   document.getElementById('syncMonthAction').addEventListener('click', syncMonthAction);
   // 复盘标签
