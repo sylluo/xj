@@ -501,8 +501,9 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .mindmap-toolbar button { flex-shrink:0;white-space:nowrap;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:4px; }
 .mindmap-toolbar button:hover { background:var(--primary-lighter);border-color:var(--primary); }
 .mindmap-toolbar button.active { background:var(--primary);color:#fff; }
-.mm-multi-bar { position:absolute;left:50%;bottom:64px;transform:translateX(-50%);display:none;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.14);padding:8px 10px;z-index:3;white-space:nowrap; }
+.mm-multi-bar { position:absolute;left:50%;bottom:64px;transform:translateX(-50%);display:none;flex-direction:column;justify-content:center;max-width:calc(100% - 20px);align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.14);padding:8px 10px;z-index:3; }
 .mm-multi-bar.show { display:flex; }
+.mm-multi-row { display:flex;flex-wrap:wrap;justify-content:center;gap:6px; }
 .mm-multi-bar .mm-multi-count { font-size:12px;color:var(--text-secondary);margin-right:2px; }
 .mm-multi-bar button { padding:6px 9px;border-radius:8px;border:1px solid var(--border);background:#fff;font-family:inherit;font-size:12px;color:var(--text);cursor:pointer; }
 .mm-multi-bar button:hover { background:var(--primary-lighter);border-color:var(--primary); }
@@ -1638,11 +1639,19 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     <canvas class="mindmap-canvas" id="mindmapCanvas"></canvas>
     <div class="mm-multi-bar" id="mmMultiBar">
       <span class="mm-multi-count" id="mmMultiCount">已选 0 个节点</span>
-      <button id="mmMultiSummary">📝 添加概要</button>
-      <button id="mmMultiMarker">🏷 添加标记</button>
-      <button id="mmMultiDone">完成</button>
+      <div class="mm-multi-row">
+        <button id="mmAlignLeft" title="所选节点左边缘对齐">⇤ 左对齐</button>
+        <button id="mmAlignCenter" title="所选节点水平居中对齐">↔ 居中</button>
+        <button id="mmAlignRight" title="所选节点右边缘对齐">⇥ 右对齐</button>
+        <button id="mmAlignDistY" title="所选节点纵向等距分布">↕ 纵向分布</button>
+      </div>
+      <div class="mm-multi-row">
+        <button id="mmMultiSummary">📝 添加概要</button>
+        <button id="mmMultiMarker">🏷 添加标记</button>
+        <button id="mmMultiDone">完成</button>
+      </div>
     </div>
-    <div class="mindmap-hint">右下角「+」新增子节点；「‹」收起子节点，点击数字展开；点节点再点一次可编辑；「☑ 多选」批量加概要/标记/样式；「🎨 样式」可改加粗、颜色、形状；空白处拖动可平移整个导图</div>
+    <div class="mindmap-hint">右下角「+」新增子节点；「‹」收起子节点，点击数字展开；点节点再点一次可编辑；「☑ 多选」批量加概要/标记/样式/对齐；「🎨 样式」可改加粗、颜色、形状；空白处拖动可平移整个导图</div>
   </div>
   <div class="mm-confirm" id="mmConfirm">
     <div class="mm-confirm-box">
@@ -5048,6 +5057,36 @@ document.addEventListener('DOMContentLoaded', ()=>{
     updateMmMultiBar();
     drawMindmap();
   });
+  // 多选对齐：左 / 居中 / 右 / 纵向等距分布
+  function mmAlignSelected(mode){
+    const sel = mmNodes.filter(n=>mmMultiSel.has(n.id));
+    if (sel.length < 2) return;
+    const items = sel.map(n=>{ const l = mmNodeLayout(n); return {n, w:l.w, h:l.h}; });
+    if (mode==='distY'){
+      if (items.length < 3){ showToast('纵向分布至少需要选择 3 个节点'); return; }
+      items.sort((a,b)=>a.n.y - b.n.y);
+      const top = items[0].n.y - items[0].h/2;
+      const bottom = items[items.length-1].n.y + items[items.length-1].h/2;
+      const totalH = items.reduce((s,it)=>s+it.h, 0);
+      const gap = (bottom - top - totalH) / (items.length - 1);
+      let cursor = top;
+      items.forEach(it=>{ it.n.y = Math.round(cursor + it.h/2); cursor += it.h + gap; });
+    } else {
+      const left = Math.min(...items.map(it=>it.n.x - it.w/2));
+      const right = Math.max(...items.map(it=>it.n.x + it.w/2));
+      const cx = (left + right)/2;
+      items.forEach(it=>{
+        if (mode==='left') it.n.x = Math.round(left + it.w/2);
+        else if (mode==='right') it.n.x = Math.round(right - it.w/2);
+        else it.n.x = Math.round(cx);
+      });
+    }
+    drawMindmap();
+  }
+  document.getElementById('mmAlignLeft').addEventListener('click',()=>mmAlignSelected('left'));
+  document.getElementById('mmAlignCenter').addEventListener('click',()=>mmAlignSelected('center'));
+  document.getElementById('mmAlignRight').addEventListener('click',()=>mmAlignSelected('right'));
+  document.getElementById('mmAlignDistY').addEventListener('click',()=>mmAlignSelected('distY'));
   document.getElementById('mmMultiSummary').addEventListener('click',async ()=>{
     const sel = mmNodes.filter(n=>mmMultiSel.has(n.id));
     if (!sel.length) return;
