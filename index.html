@@ -1644,10 +1644,6 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <button id="mmAlignCenter" title="所选节点水平居中对齐">↔ 居中</button>
         <button id="mmAlignRight" title="所选节点右边缘对齐">⇥ 右对齐</button>
         <button id="mmAlignDistY" title="所选节点纵向等距分布">↕ 纵向分布</button>
-      </div>
-      <div class="mm-multi-row">
-        <button id="mmMultiSummary">📝 添加概要</button>
-        <button id="mmMultiMarker">🏷 添加标记</button>
         <button id="mmMultiDone">完成</button>
       </div>
     </div>
@@ -4944,13 +4940,21 @@ document.addEventListener('DOMContentLoaded', ()=>{
     drawMindmap();
   }
   document.getElementById('mmSummary').addEventListener('click',()=>{
+    if (mmMultiMode && mmMultiSel.size){
+      editMmSummaryGroup(mmNodes.filter(n=>mmMultiSel.has(n.id)), null);
+      return;
+    }
     if (mmSelectedId===null){ showToast('请先点选一个节点'); return; }
     editMmSummary(mmNodes.find(n=>n.id===mmSelectedId));
   });
   let mmMarkerTargets = [];
   document.getElementById('mmMarker').addEventListener('click',()=>{
-    if (mmSelectedId===null){ showToast('请先点选一个节点'); return; }
-    mmMarkerTargets = [mmSelectedId];
+    if (mmMultiMode && mmMultiSel.size){
+      mmMarkerTargets = [...mmMultiSel];
+    } else {
+      if (mmSelectedId===null){ showToast('请先点选一个节点'); return; }
+      mmMarkerTargets = [mmSelectedId];
+    }
     document.getElementById('mmMarkerPanel').classList.add('show');
   });
   document.getElementById('mmMarkerPanel').addEventListener('click',(e)=>{
@@ -5087,20 +5091,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('mmAlignCenter').addEventListener('click',()=>mmAlignSelected('center'));
   document.getElementById('mmAlignRight').addEventListener('click',()=>mmAlignSelected('right'));
   document.getElementById('mmAlignDistY').addEventListener('click',()=>mmAlignSelected('distY'));
-  document.getElementById('mmMultiSummary').addEventListener('click',async ()=>{
-    const sel = mmNodes.filter(n=>mmMultiSel.has(n.id));
-    if (!sel.length) return;
-    const txt = await showPrompt({title:`为选中的 ${sel.length} 个节点添加概要（留空则删除）`, value:''});
-    if (txt===null) return;
-    const v = txt.trim();
-    sel.forEach(n=>{ if (v) n.summary = v; else delete n.summary; });
-    drawMindmap();
-  });
-  document.getElementById('mmMultiMarker').addEventListener('click',()=>{
-    if (!mmMultiSel.size) return;
-    mmMarkerTargets = [...mmMultiSel];
-    document.getElementById('mmMarkerPanel').classList.add('show');
-  });
   document.getElementById('mmDelNode').addEventListener('click',()=>{
     if (mmSelectedId===null || mmSelectedId===0) { showToast('不能删除根节点'); return; }
     const cur = mmNodes.find(n=>n.id===mmSelectedId);
