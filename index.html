@@ -300,8 +300,19 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .export-btn,.import-btn { padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:var(--paper);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;font-family:'Songti SC','STSong',serif;letter-spacing:1px; }
 .export-btn:hover,.import-btn:hover { border-color:var(--primary);color:var(--primary);background:var(--primary-lighter); }
 /* Markdown 导出按钮 / 日期范围选择 */
-.md-export-btn { padding:4px 10px;border-radius:8px;border:1px solid var(--primary);background:#fff;color:var(--primary);font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0; }
-.md-export-btn:hover { background:var(--primary-lighter); }
+.md-export-btn { padding:5px 12px;border-radius:10px;border:1px solid var(--primary-light);background:#fff;color:var(--primary-dark);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;line-height:1.4;transition:all .15s; }
+.md-export-btn:hover { background:var(--primary-lighter);border-color:var(--primary);color:var(--primary); }
+.md-export-btn:active { transform:scale(.97); }
+/* 回顾页导图 / 成长卡片标题栏 */
+.review-mm-card { padding:14px 16px; }
+.review-mm-card .card-title { margin:0; justify-content:space-between; gap:12px; }
+.review-mm-card .card-title::after { display:none; }
+.review-card-actions { display:flex;align-items:center;gap:18px;margin-left:auto;flex-shrink:0; }
+.review-mm-card .collapse-btn { width:30px;height:30px;padding:0;border-radius:50%;background:var(--primary-lighter);border:1px solid var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.review-mm-card .collapse-btn .icon { width:16px;height:16px; }
+.review-mm-card .collapse-body { padding-top:6px; }
+/* 导出预览弹窗 */
+.md-export-preview { max-height:38vh;overflow:auto;background:#f7f9fa;border:1px solid var(--border-light);border-radius:10px;padding:10px;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--text-secondary);margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace; }
 .md-export-wide { width:100%;margin-top:14px;padding:12px;border-radius:12px;border:1px dashed var(--primary);background:#fff;color:var(--primary);font-size:14px;cursor:pointer;font-family:inherit; }
 .md-export-wide:hover { background:var(--primary-lighter); }
 .export-range-types { display:grid;grid-template-columns:repeat(3,1fr);gap:6px; }
@@ -695,6 +706,36 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .growth-group-body { padding:2px 0 10px; }
 .growth-group-body .review-list-item { margin-bottom:6px; background:#f8fafb; }
 .growth-group-body .review-list-item:last-child { margin-bottom:0; }
+
+/* ============ 回顾 / 复盘子页统一背景：整页一层纸面，内部用分隔线 ============ */
+#reviewSectionBody, #reviewTodayWrap, .review-panel {
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px; padding:14px;
+}
+#reviewSectionBody { min-height:120px; }
+#reviewTodayWrap .review-calendar-card { background:transparent; border:none; box-shadow:none; padding:0; margin-bottom:10px; }
+#reviewTodayWrap .review-list-item,
+#reviewSectionBody .review-list-item {
+  background:transparent; border:none; border-bottom:1px dashed var(--border-light);
+  border-radius:0; margin-bottom:0; padding:10px 2px;
+}
+#reviewTodayWrap .review-list-item:last-child,
+#reviewSectionBody .review-list-item:last-child { border-bottom:none; }
+#reviewTodayWrap .review-detail-card { background:#f7f9fa; border:1px solid var(--border-light); }
+#reviewSectionBody .growth-wrap { background:transparent; border:none; box-shadow:none; padding:0; }
+#reviewSectionBody .growth-group-body .review-list-item { background:transparent; }
+#reviewSectionBody .review-mm-card { padding:0; background:transparent; border:none; box-shadow:none; }
+.review-panel .rev-fold { background:transparent; box-shadow:none; border:none; overflow:visible; }
+.review-panel .rev-fold .card-title,
+.review-panel .rev-fold.blue .card-title {
+  background:#f4f7f6; color:var(--primary-dark);
+  border:1px solid var(--border-light); border-radius:10px;
+}
+.review-panel .rev-fold .collapse-body { background:transparent; padding:10px 2px 4px; }
+.review-panel .sub-fold { background:transparent; border:none; border-bottom:1px dashed var(--border-light); border-radius:0; margin-top:0; }
+.review-panel .sub-fold:last-child { border-bottom:none; }
+.review-panel .sub-fold-head { background:transparent; padding:10px 2px; }
+.review-panel .sub-fold-body { padding:4px 2px 10px; }
+.review-period-card { background:#f7f9fa; border:1px solid var(--border-light); }
 
 /* 反思输入框字号：比小标题(13px)略小 */
 .reflection-hint { font-size:11px; color:var(--text-light); line-height:1.5; margin:-2px 0 5px; letter-spacing:.2px; }
@@ -1519,6 +1560,20 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     <div class="prompt-actions">
       <button id="exportMdCancel">取消</button>
       <button class="primary" id="exportMdOk">导出</button>
+    </div>
+  </div>
+</div>
+
+<!-- Markdown 导出：文件内预览弹窗 -->
+<div class="prompt-modal" id="mdExportModal">
+  <div class="prompt-box" style="max-width:360px;">
+    <div class="prompt-title" id="mdExportTitle">导出 Markdown</div>
+    <div class="export-range-hint" id="mdExportSummary"></div>
+    <pre class="md-export-preview" id="mdExportPreview"></pre>
+    <div class="prompt-actions">
+      <button id="mdExportClose">关闭</button>
+      <button id="mdExportCopy">复制</button>
+      <button class="primary" id="mdExportDownload">下载 .md</button>
     </div>
   </div>
 </div>
@@ -2673,8 +2728,19 @@ function exportMarkdown(keys, label){
 
     md += '---\n\n';
   });
-  downloadMd(`心迹日记本_${(label||dateKey(today())).replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
+  const fn = `心迹日记本_${(label||dateKey(today())).replace(/[\\/:*?"<>|\s]+/g,'_')}.md`;
+  openMdDialog(`日记导出${label?' · '+label:''}`, fn, md);
 }
+// 文件内 Markdown 预览弹窗（替代浏览器原生下载/对话框）
+let mdDialogFile = '', mdDialogContent = '';
+function openMdDialog(title, filename, content){
+  mdDialogFile = filename; mdDialogContent = content;
+  document.getElementById('mdExportTitle').textContent = title;
+  document.getElementById('mdExportSummary').textContent = `共 ${content.split('\n').length} 行 · ${content.length} 字符`;
+  document.getElementById('mdExportPreview').textContent = content;
+  document.getElementById('mdExportModal').classList.add('show');
+}
+function closeMdDialog(){ document.getElementById('mdExportModal').classList.remove('show'); }
 
 // ============ Markdown 导出：日期范围选择 ============
 let exportRangeType = 'all';
@@ -2754,7 +2820,7 @@ function exportMindmapMd(kind){
   const mm = latestMindmap(kind);
   if (!mm || !mm.nodes || !mm.nodes.length){ showToast('暂无思维导图可导出'); return; }
   const name = kind==='book' ? '书账思维导图' : '学习思维导图';
-  downloadMd(`${name}_${dateKey(today())}.md`, `# ${name}\n\n${mindmapToMarkdown(mm)}\n`);
+  openMdDialog(`导出${name}`, `${name}_${dateKey(today())}.md`, `# ${name}\n\n${mindmapToMarkdown(mm)}\n`);
 }
 function collectGrowthGroups(){
   const items = [];
@@ -2778,7 +2844,7 @@ function exportGrowthMd(){
     groups[t].forEach(it=>{ md += `- ${it.dk} ${it.content}${it.tags.length?'　'+it.tags.map(x=>'#'+x).join(' '):''}\n`; });
     md += '\n';
   });
-  downloadMd(`成长记录_${dateKey(today())}.md`, md);
+  openMdDialog('导出成长记录', `成长记录_${dateKey(today())}.md`, md);
 }
 
 // ============ 复盘页：周 / 月 / 季 导出（读取当前页面已渲染的数据 + 反思输入框） ============
@@ -2845,21 +2911,21 @@ function exportWeekReviewMd(){
   const overview = document.querySelector('.rev-fold[data-collapse="weekOverview"]');
   if (overview) overview.querySelectorAll('.sub-fold').forEach(f=>{ md += mdFoldSection(f); });
   md += `## 💭 深度反思\n\n` + mdReflection(document.querySelector('.rev-fold[data-collapse="weekReflection"]'));
-  downloadMd(`周复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
+  openMdDialog(`导出周复盘 · ${label}`, `周复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
 }
 function exportMonthReviewMd(){
   const label = mdText(document.getElementById('monthReviewLabel')) || '本月';
   let md = `# 月复盘（${label}）\n\n## 📋 数据概览\n\n`;
   md += mdContainerChildren(document.getElementById('monthReviewContent'));
   md += `## 💭 深度反思\n\n` + mdReflection(document.querySelector('.rev-fold[data-collapse="monthReflection"]'));
-  downloadMd(`月复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
+  openMdDialog(`导出月复盘 · ${label}`, `月复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
 }
 function exportSeasonReviewMd(){
   const label = mdText(document.getElementById('seasonReviewLabel')) || '本季';
   let md = `# 季复盘（${label}）\n\n## 📋 数据概览\n\n`;
   md += mdContainerChildren(document.getElementById('seasonReviewContent'));
   md += `## 💭 深度反思\n\n` + mdReflection(document.querySelector('.rev-fold[data-collapse="seasonReflection"]'));
-  downloadMd(`季复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
+  openMdDialog(`导出季复盘 · ${label}`, `季复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
 }
 
 // 导入JSON备份
@@ -3769,7 +3835,7 @@ function renderReviewSection(section){
       }
     });
     const mm = latestMindmap('book');
-    const mmCard = `<div class="card collapsible open" style="margin-bottom:12px;"><div class="card-title clickable"><span style="display:flex;align-items:center;gap:12px;"><span>🧠 思维导图</span><button class="md-export-btn" data-md-export="book" title="只导出树状思维导图">导出md</button></span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
+    const mmCard = `<div class="card collapsible open review-mm-card" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图</span><span class="review-card-actions"><button class="md-export-btn" data-md-export="book" title="只导出树状思维导图">导出md</button><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
       <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
     body.innerHTML = mmCard + (items.length
       ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
@@ -3787,7 +3853,7 @@ function renderReviewSection(section){
       }
     });
     const mm = latestMindmap('study');
-    const mmCard = `<div class="card collapsible open" style="margin-bottom:12px;"><div class="card-title clickable"><span style="display:flex;align-items:center;gap:12px;"><span>🧠 思维导图</span><button class="md-export-btn" data-md-export="study" title="只导出树状思维导图">导出md</button></span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
+    const mmCard = `<div class="card collapsible open review-mm-card" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图</span><span class="review-card-actions"><button class="md-export-btn" data-md-export="study" title="只导出树状思维导图">导出md</button><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
       <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
     body.innerHTML = mmCard + (items.length
       ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
@@ -3813,7 +3879,7 @@ function renderReviewSection(section){
         </div>`).join('')}</div>
       </div>`;
     }).join('') : '<div class="review-detail-empty">暂无成长记录</div>';
-    body.innerHTML = `<div class="growth-wrap"><div style="display:flex;justify-content:flex-end;margin-bottom:10px;"><button class="md-export-btn" data-md-export="growth" title="按标签分组导出成长内容">导出md</button></div>${filterBar}${groupsHtml}</div>`;
+    body.innerHTML = `<div class="card review-mm-card" style="margin-bottom:12px;"><div class="card-title"><span>🌱 成长记录</span><span class="review-card-actions"><button class="md-export-btn" data-md-export="growth" title="按标签分组导出成长内容">导出md</button></span></div></div><div class="growth-wrap">${filterBar}${groupsHtml}</div>`;
   }
   initCollapsible();
 }
@@ -4302,6 +4368,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if (!sel.keys.length){ showToast('所选范围暂无数据'); return; }
     closeExportMdModal();
     exportMarkdown(sel.keys, sel.label);
+  });
+  // Markdown 预览弹窗：关闭 / 复制 / 下载
+  document.getElementById('mdExportClose').addEventListener('click', closeMdDialog);
+  document.getElementById('mdExportModal').addEventListener('click',(e)=>{ if (e.target===e.currentTarget) closeMdDialog(); });
+  document.getElementById('mdExportCopy').addEventListener('click', ()=>{
+    const done = ()=>showToast('📋 已复制到剪贴板');
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(mdDialogContent).then(done).catch(()=>{
+        const ta=document.createElement('textarea'); ta.value=mdDialogContent;
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done();
+      });
+    } else {
+      const ta=document.createElement('textarea'); ta.value=mdDialogContent;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done();
+    }
+  });
+  document.getElementById('mdExportDownload').addEventListener('click', ()=>{
+    downloadMd(mdDialogFile || `心迹导出_${dateKey(today())}.md`, mdDialogContent);
+    closeMdDialog();
   });
   // 各类「导出md」按钮（捕获阶段拦截，避免触发卡片折叠）
   document.addEventListener('click',(e)=>{
