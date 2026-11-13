@@ -3486,6 +3486,18 @@ function mmHitTest(x,y){
   }
   return null;
 }
+// 收集某个节点的所有后代节点 id（不含自身）
+function mmCollectSubtree(rootId){
+  const out = [];
+  const stack = [rootId];
+  while (stack.length){
+    const pid = stack.pop();
+    mmNodes.forEach(n=>{
+      if (n.parent === pid){ out.push(n.id); stack.push(n.id); }
+    });
+  }
+  return out;
+}
 // 命中概要大括号右侧的文字
 function mmSummaryHitTest(x,y){
   const lays = mmSummaryLayout();
@@ -5152,7 +5164,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   mmCanvas.addEventListener('touchmove', onMmMove, {passive:false});
   mmCanvas.addEventListener('mouseup', onMmUp);
   mmCanvas.addEventListener('touchend', onMmUp);
-  let mmDownPos = null, mmMoved = false, mmWasSelected = false;
+  let mmDownPos = null, mmMoved = false, mmWasSelected = false, mmDragSubtree = [];
   let mmPanning = false, mmPanLast = null;
   function onMmDown(e){
     e.preventDefault();
@@ -5206,6 +5218,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       mmSelectedId = node.id;
       mmDragging = node;
       mmDragOffset = {x: node.x-x, y: node.y-y};
+      mmDragSubtree = mmCollectSubtree(node.id);
       mmDownPos = {x,y};
       mmMoved = false;
       drawMindmap();
@@ -5231,8 +5244,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return;
     }
     if (mmDownPos && (Math.abs(x-mmDownPos.x)>3 || Math.abs(y-mmDownPos.y)>3)) mmMoved = true;
-    mmDragging.x = x + mmDragOffset.x;
-    mmDragging.y = y + mmDragOffset.y;
+    const nx = x + mmDragOffset.x, ny = y + mmDragOffset.y;
+    const dx = nx - mmDragging.x, dy = ny - mmDragging.y;
+    mmDragging.x = nx;
+    mmDragging.y = ny;
+    // 整棵子树跟随父节点平移，保持相对位置
+    if (dx || dy){
+      mmDragSubtree.forEach(id=>{
+        const n = mmNodes.find(m=>m.id===id);
+        if (n){ n.x += dx; n.y += dy; }
+      });
+    }
     drawMindmap();
   }
   function onMmUp(e){
