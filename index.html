@@ -300,8 +300,8 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .export-btn,.import-btn { padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:var(--paper);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;font-family:'Songti SC','STSong',serif;letter-spacing:1px; }
 .export-btn:hover,.import-btn:hover { border-color:var(--primary);color:var(--primary);background:var(--primary-lighter); }
 /* Markdown 导出按钮 / 日期范围选择 */
-.md-export-btn { padding:5px 12px;border-radius:10px;border:1px solid var(--primary-light);background:#fff;color:var(--primary-dark);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;line-height:1.4;transition:all .15s; }
-.md-export-btn:hover { background:var(--primary-lighter);border-color:var(--primary);color:var(--primary); }
+.md-export-btn { padding:0 10px;margin-left:8px;border-radius:8px;border:1px dashed var(--primary);background:transparent;color:var(--primary-dark);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;line-height:1.3;vertical-align:middle;transition:all .15s; }
+.md-export-btn:hover { background:var(--primary-lighter);color:var(--primary); }
 .md-export-btn:active { transform:scale(.97); }
 /* 回顾页导图 / 成长卡片标题栏 */
 .review-mm-card { padding:14px 16px; }
@@ -3043,6 +3043,21 @@ let mmCanvas, mmCtx, mmNodes, mmSelectedId, mmDragging, mmDragOffset, mmNextId;
 let mmCollapsed = new Set(); // 编辑器中已收起子节点的节点 id
 let mmMultiMode = false, mmMultiSel = new Set(); // 多选模式及已选节点
 
+// 记忆书账/学习导图各自的视图状态（折叠的分支 + 选中节点），下次打开自动恢复
+let mmLastViewSaved = '';
+function readMmView(){
+  try { return JSON.parse(localStorage.getItem('mmViewState')) || {}; } catch(e){ return {}; }
+}
+function persistMmView(){
+  if (!mindmapTarget || !mmNodes) return;
+  const snap = JSON.stringify({c:[...mmCollapsed].sort((a,b)=>a-b), s:mmSelectedId});
+  if (snap === mmLastViewSaved) return; // 无变化（如拖拽途中）不重复写入
+  mmLastViewSaved = snap;
+  const all = readMmView();
+  all[mindmapTarget] = { collapsed:[...mmCollapsed], selectedId:mmSelectedId };
+  try { localStorage.setItem('mmViewState', JSON.stringify(all)); } catch(e){}
+}
+
 // 取最近一次保存的思维导图（按日期向前回溯，用于跨日期延续编辑）
 function latestMindmap(kind, upToKey){
   // 全局保存的最新一份优先
@@ -3081,8 +3096,12 @@ function openMindmap(target, existingData){
     mmNodes = [{id:0, text:rootText, x:cx, y:cy, parent:null}];
     mmNextId = 1;
   }
-  mmSelectedId = 0;
-  mmCollapsed = new Set();
+  // 恢复上次打开/编辑的视图状态（折叠的分支 + 选中的节点）
+  const mmView = readMmView()[target] || {};
+  mmCollapsed = new Set(mmView.collapsed || []);
+  const selId = mmView.selectedId;
+  mmSelectedId = (selId!=null && mmNodes.some(n=>n.id===selId)) ? selId : 0;
+  mmLastViewSaved = ''; // 强制下次绘制时把当前状态写回
   mmMultiMode = false;
   mmMultiSel = new Set();
   const mt = document.getElementById('mmMultiToggle');
@@ -3168,6 +3187,7 @@ function mmLabel(n){
   return (n.marker ? n.marker + ' ' : '') + (n.text || '');
 }
 function drawMindmap(){
+  persistMmView(); // 同步记忆视图状态（折叠/选中），下次打开恢复
   const ctx = mmCtx;
   ctx.clearRect(0,0,mmCanvas.width,mmCanvas.height);
   const visible = getVisibleMmNodes();
@@ -3879,7 +3899,7 @@ function renderReviewSection(section){
       }
     });
     const mm = latestMindmap('book');
-    const mmCard = `<div class="card collapsible open review-mm-card" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图</span><span class="review-card-actions"><button class="md-export-btn" data-md-export="book" title="只导出树状思维导图">导出md</button><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
+    const mmCard = `<div class="card collapsible open review-mm-card" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图<button class="md-export-btn" data-md-export="book" title="只导出树状思维导图">导出md</button></span><span class="review-card-actions"><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
       <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
     body.innerHTML = mmCard + (items.length
       ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
@@ -3897,7 +3917,7 @@ function renderReviewSection(section){
       }
     });
     const mm = latestMindmap('study');
-    const mmCard = `<div class="card collapsible open review-mm-card" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图</span><span class="review-card-actions"><button class="md-export-btn" data-md-export="study" title="只导出树状思维导图">导出md</button><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
+    const mmCard = `<div class="card collapsible open review-mm-card" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图<button class="md-export-btn" data-md-export="study" title="只导出树状思维导图">导出md</button></span><span class="review-card-actions"><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
       <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
     body.innerHTML = mmCard + (items.length
       ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
@@ -3923,7 +3943,7 @@ function renderReviewSection(section){
         </div>`).join('')}</div>
       </div>`;
     }).join('') : '<div class="review-detail-empty">暂无成长记录</div>';
-    body.innerHTML = `<div class="card review-mm-card" style="margin-bottom:12px;"><div class="card-title"><span>🌱 成长记录</span><span class="review-card-actions"><button class="md-export-btn" data-md-export="growth" title="按标签分组导出成长内容">导出md</button></span></div></div><div class="growth-wrap">${filterBar}${groupsHtml}</div>`;
+    body.innerHTML = `<div class="card review-mm-card" style="margin-bottom:12px;"><div class="card-title"><span>🌱 成长记录<button class="md-export-btn" data-md-export="growth" title="按标签分组导出成长内容">导出md</button></span></div></div><div class="growth-wrap">${filterBar}${groupsHtml}</div>`;
   }
   initCollapsible();
 }
