@@ -192,6 +192,7 @@ body {
 .time-section.collapsed { box-shadow:var(--shadow-sm); }
 .time-section.morning .time-section-header { background:linear-gradient(135deg,#ffedc0 0%,#ffd98a 55%,#ffc64d 100%);color:#8a5a10; }
 .time-section.evening .time-section-header { background:linear-gradient(135deg,#e0ebf7 0%,#bdd1e8 50%,#8fb0d6 100%);color:#2c4a73; }
+.time-section.growth-section .time-section-header { background:linear-gradient(135deg,#e5f2e9 0%,#b9d9c5 50%,#82b197 100%);color:#315e49; }
 .time-section-icon { font-size:24px;line-height:1; }
 .time-section-title { font-size:17px;font-weight:700;color:inherit;font-family:'Songti SC','STSong','SimSun',serif;letter-spacing:2px; }
 .time-section-sub { font-size:12px;color:rgba(138,90,16,0.75);margin-top:2px;letter-spacing:1px; }
@@ -1092,8 +1093,12 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     </div>
 
     <!-- 成长记录 -->
-    <div class="card">
-      <div class="card-title"><svg class="icon"><use href="#i-leaf"></use></svg>成长记录</div>
+    <div class="time-section evening growth-section">
+      <div class="time-section-header">
+        <span class="time-section-icon"><svg class="icon"><use href="#i-leaf"></use></svg></span>
+        <div class="time-section-title">成长记录</div>
+      </div>
+      <div class="time-section-body">
       <div class="record-tabs">
         <button class="record-tab active" data-tab="sport"><svg class="icon"><use href="#i-run"></use></svg> 运动</button>
         <button class="record-tab" data-tab="study"><svg class="icon"><use href="#i-book"></use></svg> 学习</button>
@@ -1194,6 +1199,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
       <div class="record-summary">
         <div class="rs-title">今日全部记录</div>
         <div id="recordSummary"></div>
+      </div>
       </div>
     </div>
 
@@ -4390,14 +4396,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
     navigateTo(d.dataset.date, {scrollTop:false});
   });
 
-  // 晨间 / 晚间日记卡片：点击标题区域折叠展开，状态本地记忆
+  // 晨间 / 晚间日记 / 成长记录卡片：点击标题区域折叠展开，状态本地记忆
   (function(){
     const storeKey = 'xj_collapsed';
     const getState = ()=>{ try{ return JSON.parse(localStorage.getItem(storeKey)||'{}'); }catch(e){ return {}; } };
     const setState = (s)=>{ try{ localStorage.setItem(storeKey, JSON.stringify(s)); }catch(e){} };
     const st = getState();
     document.querySelectorAll('.time-section').forEach(sec=>{
-      const key = sec.classList.contains('morning') ? 'morning' : 'evening';
+      const key = sec.classList.contains('morning') ? 'morning' : sec.classList.contains('growth-section') ? 'growth' : 'evening';
       if (st[key]) sec.classList.add('collapsed');
       const header = sec.querySelector('.time-section-header');
       header.addEventListener('click', ()=>{
