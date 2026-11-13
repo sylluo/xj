@@ -3131,7 +3131,7 @@ function openMindmap(target, existingData){
     mmNodes = existingData.nodes.map(n=>({...n}));
     mmNextId = Math.max(0, ...mmNodes.map(n=>n.id)) + 1;
   } else {
-    const cx = mmCanvas.width/2, cy = mmCanvas.height/2;
+    const dpr0 = window.devicePixelRatio||1; const cx = mmCanvas.width/dpr0/2, cy = mmCanvas.height/dpr0/2;
     const rootText = target==='book' ? '书账思维导图' : '学习思维导图';
     mmNodes = [{id:0, text:rootText, x:cx, y:cy, parent:null}];
     mmNextId = 1;
@@ -3206,8 +3206,12 @@ function closePrompt(ok){
 }
 function resizeMindmap(){
   const rect = mmCanvas.parentElement.getBoundingClientRect();
-  mmCanvas.width = rect.width;
-  mmCanvas.height = rect.height;
+  // 高分屏（Retina）：画布物理像素 = CSS 尺寸 × devicePixelRatio，避免文本被拉伸模糊
+  const dpr = window.devicePixelRatio || 1;
+  mmCanvas.width = Math.round(rect.width * dpr);
+  mmCanvas.height = Math.round(rect.height * dpr);
+  // 仍以 CSS 像素作为绘制坐标系，放大到设备像素，节点坐标/命中测试无需改动
+  mmCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 // 仅返回当前可见的节点（折叠节点的后代不绘制、不可选中）
 function getVisibleMmNodes(){
@@ -3229,7 +3233,8 @@ function mmLabel(n){
 function drawMindmap(){
   persistMmView(); // 同步记忆视图状态（折叠/选中），下次打开恢复
   const ctx = mmCtx;
-  ctx.clearRect(0,0,mmCanvas.width,mmCanvas.height);
+  const dpr = window.devicePixelRatio || 1;
+  ctx.clearRect(0,0,mmCanvas.width/dpr,mmCanvas.height/dpr);
   const visible = getVisibleMmNodes();
   const visibleIds = new Set(visible.map(n=>n.id));
   // 连线（直线形状的节点把锚点放在下划线的首/尾，保证无缝衔接）
@@ -4948,7 +4953,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
   document.getElementById('mmClear').addEventListener('click',()=>{
     mmAskConfirm('确定清空思维导图的全部节点？', ()=>{
-      const cx = mmCanvas.width/2, cy = mmCanvas.height/2;
+      const dpr0 = window.devicePixelRatio||1; const cx = mmCanvas.width/dpr0/2, cy = mmCanvas.height/dpr0/2;
     mmNodes = [{id:0, text:'中心主题', x:cx, y:cy, parent:null}];
     mmNextId = 1; mmSelectedId = 0;
     mmCollapsed.clear();
