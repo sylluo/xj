@@ -875,7 +875,6 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     <style>
     .daily-quote{margin-bottom:14px;padding:14px 18px;background:linear-gradient(135deg,#ffedc0 0%,#ffd98a 55%,#ffc64d 100%);border-radius:12px;border:none;position:relative;box-shadow:0 2px 10px rgba(232,163,61,0.18);}
     .daily-quote-text{font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.9;color:#5a3a10;letter-spacing:1px;padding:0;text-indent:0;white-space:normal;word-break:break-word;overflow:visible;text-overflow:clip;display:block;}
-    .daily-quote-sign{text-align:right;margin-top:4px;font-size:12px;color:rgba(90,58,16,0.7);font-style:italic;padding-right:4px;font-family:'Songti SC',serif;}
     </style>
 
     <!-- ========== 晨间日记 ========== -->
@@ -1195,16 +1194,17 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
       </div>
     </div>
 
+    <input type="file" id="importFile" accept=".json,application/json" style="display:none;">
+
+    <div class="daily-quote">
+      <div class="daily-quote-text" id="dailyQuoteText"></div>
+    </div>
+
     <button class="save-btn" id="saveBtn"><svg class="icon"><use href="#i-save"></use></svg>保存日记</button>
     <div class="btn-actions">
       <button class="export-btn" id="exportBtn"><svg class="icon"><use href="#i-download"></use></svg>JSON备份</button>
       <button class="export-btn" id="exportExcelBtn"><svg class="icon"><use href="#i-book-2"></use></svg>Markdown</button>
       <button class="import-btn" id="importBtn"><svg class="icon"><use href="#i-upload"></use></svg>导入</button>
-    </div>
-    <input type="file" id="importFile" accept=".json,application/json" style="display:none;">
-    <div class="daily-quote">
-      <div class="daily-quote-text" id="dailyQuoteText"></div>
-      <div class="daily-quote-sign">—— 毛泽东</div>
     </div>
 
   </div>
@@ -2602,66 +2602,80 @@ function exportData(){
 }
 
 
-// 毛选每日箴言（按日期取哈希，同天固定、不同天随机）
-const MAO_QUOTES = [
-'没有调查，就没有发言权。',
-'实践是检验真理的唯一标准。',
-'读书是学习，使用也是学习，而且是更重要的学习。',
-'情况是在不断地变化，要使自己的思想适应新的情况，就得学习。',
-'一切真知都是从直接经验发源的。',
-'实践、认识、再实践、再认识，这种形式，循环往复以至无穷。',
-'人们要想得到工作的胜利，一定要使自己的思想合于客观外界的规律性。',
-'认识从实践始，经过实践得到了理论的认识，还须再回到实践去。',
-'我们看事情必须要看它的实质，而把它的现象只看作入门的向导，一进了门就要抓住它的实质，这才是可靠的科学的分析方法。',
-'研究任何过程，如果是存在着两个以上矛盾的复杂过程的话，就要用全力找出它的主要矛盾。捉住了这个主要矛盾，一切问题就迎刃而解了。',
-'所谓分析，就是分析事物的矛盾。',
-'学会分析矛盾，养成分析的习惯。',
-'理解之后，才能深刻感知事物。',
-'世界上没有绝对地平衡发展的东西。',
-'马克思主义者看问题，不但要看到部分，而且要看到全体。',
-'错误往往是正确的先导。',
-'错误和挫折教训了我们，使我们比较地聪明起来了。',
-'前途是光明的，道路是曲折的。',
-'星星之火，可以燎原。',
-'我们的目的一定要达到。我们的目的一定能够达到。',
-'丢掉幻想，准备斗争。',
-'我们自己的命运完全应当由我们自己来掌握。',
-'下定决心，不怕牺牲，排除万难，去争取胜利。',
-'世上无难事，只要肯登攀。',
-'与天奋斗，其乐无穷！与地奋斗，其乐无穷！与人奋斗，其乐无穷！',
-'自力更生，艰苦奋斗。',
-'坚持就是胜利。',
-'不怕困难，不怕挫折。',
-'夺取胜利的关键，在于主观的努力。',
-'要奋斗就会有牺牲。',
-'什么叫工作，工作就是斗争。',
-'一切新的东西都是从艰苦斗争中锻炼出来的。',
-'无限风光在险峰。',
-'一切反动派都是纸老虎。',
-'战略上藐视敌人，战术上重视敌人。',
-'人不犯我，我不犯人；人若犯我，我必犯人。',
-'不打无准备之仗，不打无把握之仗。',
-'打得赢就打，打不赢就走。',
-'落后就要挨打。',
-'虚心使人进步，骄傲使人落后。',
-'好好学习，天天向上。',
-'人是要有一点精神的。',
-'不要吃老本，要立新功。',
-'饭可以一日不吃，觉可以一日不睡，书不可以一日不读。',
-'贵有恒，何必三更起五更眠；最无益，只怕一日曝十日寒。',
-'文明其精神，野蛮其体魄。',
-'我们需要的是热烈而镇定的情绪，紧张而有秩序的工作。',
-'榜样的力量是无穷的。',
-'俏也不争春，只把春来报。',
-'待到山花烂漫时，她在丛中笑。'
+// 每日箴言（按日期取哈希，同周期固定显示；每2天轮换一条）
+const DAILY_QUOTES = [
+'我的任务是说清楚，不是被喜欢。',
+'对方的表情不等于对我的判决。',
+'我在猜，不是在读心。',
+'他可能只是在走神，不是在否定我。',
+'我说完了，我的部分就结束了。',
+'评价是对方的课题，表达是我的课题。',
+'我不需要现场赢得所有人。',
+'紧张可以被看见，话照样可以说下去。',
+'别人展示的是结果，我体验的是过程。',
+'我没看到他们的混乱，不等于他们没有。',
+'狼狈是正在做困难事情的证据。',
+'我不是唯一一个会卡住的人。',
+'我的内部体验不是公共事实。',
+'这句话是孤立感在说话，不是事实在说话。',
+'我可以做得不好，同时不否定整个人。',
+'先减少输入，再增加方法。',
+'此刻只需要抓住一件具体的小事。',
+'我不需要想明白全部，只需要说清楚这一句。',
+'停一下，不是放弃，是换气。',
+'把注意力放回手里正在做的这一件事。',
+'慢一点，世界不会因为这两秒塌掉。',
+'我可以先不做决定，先稳住。',
+'过载不是能力问题，是负荷问题。',
+'输入够用就停。',
+'不是所有信息都需要我处理。',
+'想不完的，可以先放下。',
+'结论一句，理由一到两句，收尾一句。',
+'先说结论，再给支撑。',
+'慢一点，停两秒，换气。',
+'一句说完，再想下一句。',
+'我不需要一口气把所有信息倒完。',
+'说清楚比说全面更重要。',
+'对方追问，说明他在听，不是在挑错。',
+'卡住了就停，停了再接，没关系。',
+'我又在骂自己了——先看见，再换语气。',
+'注意到，就已经是改变的开始。',
+'我可以对自己说一句朋友会说的话。',
+'这不是性格缺陷，是习惯性反应。',
+'我不需要为"有情绪"而道歉。',
+'今天做到一点点，就算数。',
+'我可以不完美地完成这件事。',
+'温柔不是放纵，是让自己还有力气继续。',
+'我在讲内容，不是在接受审判。',
+'听众要的是信息，不是我的完美表现。',
+'讲完这一页，这一页就过去了。',
+'我不需要回放刚才的失误，只需要讲好下一句。',
+'说清楚，不讨好。',
+'没看到，不等于没有。',
+'先做一件小的事。',
+'我的课题，他的课题。',
+'慢一点，没关系。',
+'别人的注意力，大部分在 themselves 身上。',
+'没有人像我以为的那样在看我。',
+'被不喜欢，不等于被否定。',
+'我可以被误解，而不急着纠正。',
+'评价会过去，我还在。',
+'我已经在做了，这就够。',
+'不完美地完成，好过完美地不动。',
+'我可以累，可以不高效。',
+'我不需要替所有人舒服。',
+'拒绝不需要长篇理由。',
+'边界不是墙，是门，我来开。'
 ];
 function renderDailyQuote(){
-  const dk = dateKey(currentDate);
-  let hash=0;
-  for(let i=0;i<dk.length;i++) hash = (hash*31 + dk.charCodeAt(i)) >>> 0;
-  const idx = hash % MAO_QUOTES.length;
+  // 每2天固定显示同一条：用 dayOfYear/2 周期轮换
+  const now = currentDate || new Date();
+  const start = new Date(now.getFullYear(),0,0);
+  const diff = (now - start) / 86400000;
+  const cycle = Math.floor(diff / 2); // 每2天一个周期
+  const idx = ((cycle % DAILY_QUOTES.length) + DAILY_QUOTES.length) % DAILY_QUOTES.length;
   const el = document.getElementById('dailyQuoteText');
-  if(el) el.textContent = MAO_QUOTES[idx];
+  if(el) el.textContent = DAILY_QUOTES[idx];
 }
 
 
