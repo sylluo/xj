@@ -299,6 +299,23 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .btn-actions { display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px; }
 .export-btn,.import-btn { padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:var(--paper);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;font-family:'Songti SC','STSong',serif;letter-spacing:1px; }
 .export-btn:hover,.import-btn:hover { border-color:var(--primary);color:var(--primary);background:var(--primary-lighter); }
+/* Markdown 导出按钮 / 日期范围选择 */
+.md-export-btn { padding:4px 10px;border-radius:8px;border:1px solid var(--primary);background:#fff;color:var(--primary);font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0; }
+.md-export-btn:hover { background:var(--primary-lighter); }
+.md-export-wide { width:100%;margin-top:14px;padding:12px;border-radius:12px;border:1px dashed var(--primary);background:#fff;color:var(--primary);font-size:14px;cursor:pointer;font-family:inherit; }
+.md-export-wide:hover { background:var(--primary-lighter); }
+.export-range-types { display:grid;grid-template-columns:repeat(3,1fr);gap:6px; }
+.export-range-types button { padding:8px 0;border-radius:8px;border:1px solid var(--border);background:#f7f9fa;font-family:inherit;font-size:12px;color:var(--text-secondary);cursor:pointer; }
+.export-range-types button.active { background:var(--primary);border-color:var(--primary);color:#fff; }
+.export-range-count { margin-top:10px;font-size:12px;color:var(--text-light); }
+.export-range-hint { font-size:12px;color:var(--text-light);margin-top:6px;line-height:1.5; }
+.export-days-list { max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:6px 10px;margin-top:8px;background:#fff; }
+.export-days-list label { display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 0;color:var(--text); }
+.export-days-list input[type=checkbox] { width:auto;min-width:0;margin:0; }
+.export-days-tools { display:flex;gap:14px;font-size:12px;margin-top:8px; }
+.export-days-tools span { color:var(--primary);cursor:pointer; }
+.export-season-row { display:flex;gap:8px; }
+.export-season-row select { flex:1; }
 
 /* 页面 */
 .page { display:none; }
@@ -1371,6 +1388,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <div class="action-card-body" id="weekActionBody"></div>
         <button class="save-btn action-sync-btn" id="syncWeekAction"><svg class="icon"><use href="#i-send"></use></svg>同步到下周一的晨间六问</button>
       </div>
+      <button class="md-export-wide" data-md-export="week">导出md（本周数据概览 + 深度反思）</button>
     </div>
 
     <!-- 月复盘 -->
@@ -1405,6 +1423,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <div class="action-card-body" id="monthActionBody"></div>
         <button class="save-btn action-sync-btn" id="syncMonthAction"><svg class="icon"><use href="#i-send"></use></svg>同步到下月 1 号的晨间六问</button>
       </div>
+      <button class="md-export-wide" data-md-export="month">导出md（本月数据概览 + 深度反思）</button>
     </div>
 
     <!-- 季复盘 -->
@@ -1444,6 +1463,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         </div>
         <button class="save-btn action-sync-btn" id="pinSeasonCard">📌 设为季度内首页固定显示</button>
       </div>
+      <button class="md-export-wide" data-md-export="season">导出md（本季数据概览 + 深度反思）</button>
     </div>
 
   </div>
@@ -1478,6 +1498,27 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     <div class="prompt-actions">
       <button id="promptCancel">取消</button>
       <button class="primary" id="promptOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- Markdown 导出：日期范围选择 -->
+<div class="prompt-modal" id="exportMdModal">
+  <div class="prompt-box" style="max-width:360px;">
+    <div class="prompt-title">导出 Markdown · 选择日期范围</div>
+    <div class="export-range-types" id="exportRangeTypes">
+      <button data-type="all" class="active">全部</button>
+      <button data-type="day">某一天</button>
+      <button data-type="days">某几天</button>
+      <button data-type="week">某一周</button>
+      <button data-type="month">某一个月</button>
+      <button data-type="season">某个季度</button>
+    </div>
+    <div id="exportRangeControls" style="margin-top:12px;"></div>
+    <div class="export-range-count" id="exportRangeCount"></div>
+    <div class="prompt-actions">
+      <button id="exportMdCancel">取消</button>
+      <button class="primary" id="exportMdOk">导出</button>
     </div>
   </div>
 </div>
@@ -2540,13 +2581,22 @@ function renderDailyQuote(){
 
 
 // 导出 Markdown
-function exportMarkdown(){
-  const keys = Object.keys(entries).sort();
+// 导出 Markdown（keys：要导出的日期数组；label：范围说明，用于标题与文件名）
+function downloadMd(filename, md){
+  const blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  showToast('📝 Markdown文件已下载');
+}
+function exportMarkdown(keys, label){
+  keys = (keys && keys.length ? [...keys] : Object.keys(entries)).sort();
   if(keys.length===0){ showToast('暂无数据可导出'); return; }
   const moodName = {happy:'开心',calm:'平静',tired:'疲惫',sad:'难过',excited:'兴奋'};
   const wName = {sunny:'晴',cloudy:'多云',overcast:'阴',rainy:'雨',snowy:'雪'};
   const weekdays=['周日','周一','周二','周三','周四','周五','周六'];
-  let md = `# 心迹日记本导出\n\n> 导出时间：${new Date().toLocaleString('zh-CN')}\n\n---\n\n`;
+  let md = `# 心迹日记本导出${label?'（'+label+'）':''}\n\n> 导出时间：${new Date().toLocaleString('zh-CN')}\n\n---\n\n`;
   keys.forEach(k=>{
     const e=entries[k];
     const d=parseKey(k);
@@ -2623,12 +2673,193 @@ function exportMarkdown(){
 
     md += '---\n\n';
   });
-  const blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url;
-  a.download = `心迹日记本_${dateKey(today())}.md`;
-  a.click(); URL.revokeObjectURL(url);
-  showToast('📝 Markdown文件已下载');
+  downloadMd(`心迹日记本_${(label||dateKey(today())).replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
+}
+
+// ============ Markdown 导出：日期范围选择 ============
+let exportRangeType = 'all';
+function openExportMdModal(){
+  exportRangeType = 'all';
+  document.querySelectorAll('#exportRangeTypes button').forEach(b=>b.classList.toggle('active', b.dataset.type==='all'));
+  renderExportRangeControls();
+  document.getElementById('exportMdModal').classList.add('show');
+}
+function closeExportMdModal(){ document.getElementById('exportMdModal').classList.remove('show'); }
+function renderExportRangeControls(){
+  const box = document.getElementById('exportRangeControls');
+  const t = exportRangeType;
+  const todayK = dateKey(today());
+  if (t==='all') box.innerHTML = '<div class="export-range-hint">导出全部日期的日记内容。</div>';
+  else if (t==='day') box.innerHTML = `<input type="date" id="expDay" value="${todayK}">`;
+  else if (t==='week') box.innerHTML = `<input type="date" id="expWeek" value="${todayK}"><div class="export-range-hint">选择该周任意一天，将按「周一至周日」导出整周。</div>`;
+  else if (t==='month') box.innerHTML = `<input type="month" id="expMonth" value="${todayK.slice(0,7)}">`;
+  else if (t==='season'){
+    const years = new Set();
+    Object.keys(entries).forEach(k=>years.add(+k.slice(0,4)));
+    const cy = today().getFullYear();
+    for (let y=cy-3;y<=cy+1;y++) years.add(y);
+    const ys = [...years].sort((a,b)=>b-a);
+    const cq = Math.floor(today().getMonth()/3)+1;
+    box.innerHTML = `<div class="export-season-row"><select id="expYear">${ys.map(y=>`<option value="${y}" ${y===cy?'selected':''}>${y}年</option>`).join('')}</select><select id="expQuarter">${[1,2,3,4].map(q=>`<option value="${q}" ${q===cq?'selected':''}>Q${q}</option>`).join('')}</select></div>`;
+  } else if (t==='days'){
+    const ks = Object.keys(entries).sort().reverse();
+    box.innerHTML = ks.length
+      ? `<div class="export-days-tools"><span data-days-tool="all">全选</span><span data-days-tool="none">清空</span></div><div class="export-days-list">${ks.map(k=>`<label><input type="checkbox" class="exp-day-check" value="${k}">${k}</label>`).join('')}</div>`
+      : '<div class="export-range-hint">暂无可导出的日期。</div>';
+  }
+  updateExportRangeCount();
+}
+function computeExportSelection(){
+  const all = Object.keys(entries).sort();
+  const t = exportRangeType;
+  if (t==='day'){
+    const el = document.getElementById('expDay');
+    const dk = el && el.value;
+    return { keys: dk && entries[dk] ? [dk] : [], label: dk || '某一天' };
+  }
+  if (t==='days'){
+    const keys = [...document.querySelectorAll('.exp-day-check:checked')].map(c=>c.value).sort();
+    return { keys, label:'自选日期' };
+  }
+  if (t==='week'){
+    const el = document.getElementById('expWeek');
+    const v = el && el.value;
+    if (!v) return { keys:[], label:'某一周' };
+    const ws = getMonday(parseKey(v)), we = addDays(ws,6);
+    const keys = [];
+    for (let i=0;i<7;i++){ const dk = dateKey(addDays(ws,i)); if (entries[dk]) keys.push(dk); }
+    return { keys, label:`${dateKey(ws)}至${dateKey(we)}` };
+  }
+  if (t==='month'){
+    const el = document.getElementById('expMonth');
+    const v = el && el.value;
+    return { keys: v ? all.filter(k=>k.slice(0,7)===v) : [], label: v || '某一个月' };
+  }
+  if (t==='season'){
+    const yEl = document.getElementById('expYear'), qEl = document.getElementById('expQuarter');
+    const y = yEl ? +yEl.value : today().getFullYear();
+    const q = qEl ? +qEl.value : 1;
+    const keys = all.filter(k=>+k.slice(0,4)===y && Math.ceil(+k.slice(5,7)/3)===q);
+    return { keys, label:`${y}年Q${q}` };
+  }
+  return { keys: all, label:'全部' };
+}
+function updateExportRangeCount(){
+  const sel = computeExportSelection();
+  document.getElementById('exportRangeCount').textContent = sel.keys.length ? `共 ${sel.keys.length} 天有记录，将导出 ${sel.keys.length} 天内容` : '所选范围暂无记录';
+}
+
+// ============ 回顾页：思维导图 / 成长 导出 ============
+function exportMindmapMd(kind){
+  const mm = latestMindmap(kind);
+  if (!mm || !mm.nodes || !mm.nodes.length){ showToast('暂无思维导图可导出'); return; }
+  const name = kind==='book' ? '书账思维导图' : '学习思维导图';
+  downloadMd(`${name}_${dateKey(today())}.md`, `# ${name}\n\n${mindmapToMarkdown(mm)}\n`);
+}
+function collectGrowthGroups(){
+  const items = [];
+  Object.keys(entries).sort().reverse().forEach(dk=>{
+    const e = entries[dk];
+    ((e && e.growthRecords) || []).forEach(r=>items.push({dk, content:r.content, tags:r.tags||[]}));
+  });
+  const groups = {};
+  items.forEach(it=>{ (it.tags.length ? it.tags : ['未分类']).forEach(t=>{ (groups[t] = groups[t] || []).push(it); }); });
+  return { items, groups };
+}
+function exportGrowthMd(){
+  const { groups } = collectGrowthGroups();
+  let names = Object.keys(groups);
+  if (growthTagFilter) names = names.filter(t=>t===growthTagFilter);
+  if (!names.length){ showToast('暂无成长记录可导出'); return; }
+  names.sort((a,b)=>groups[b].length-groups[a].length || a.localeCompare(b));
+  let md = `# 成长记录${growthTagFilter?'（#'+growthTagFilter+'）':''}\n\n> 导出时间：${new Date().toLocaleString('zh-CN')}\n\n`;
+  names.forEach(t=>{
+    md += `## ${t==='未分类'?'🏷 未分类':'#'+t}（${groups[t].length} 条）\n\n`;
+    groups[t].forEach(it=>{ md += `- ${it.dk} ${it.content}${it.tags.length?'　'+it.tags.map(x=>'#'+x).join(' '):''}\n`; });
+    md += '\n';
+  });
+  downloadMd(`成长记录_${dateKey(today())}.md`, md);
+}
+
+// ============ 复盘页：周 / 月 / 季 导出（读取当前页面已渲染的数据 + 反思输入框） ============
+function mdText(el){ return el ? el.textContent.replace(/\s+/g,' ').trim() : ''; }
+function mdTimelineItem(it){
+  const d = it.querySelector('.timeline-item-date');
+  const dateTxt = d ? mdText(d) : '';
+  const clone = it.cloneNode(true);
+  const dd = clone.querySelector('.timeline-item-date');
+  if (dd) dd.remove();
+  return `- ${dateTxt ? dateTxt+'：' : ''}${mdText(clone)}`;
+}
+function mdBodyLines(body){
+  if (!body) return [];
+  const q = s => [...body.querySelectorAll(s)];
+  if (q('.mw-cell').length) return q('.mw-cell').map(c=>`- ${mdText(c.querySelector('.mw-cell-label'))}：${mdText(c.querySelector('.mw-cell-emoji'))} ${mdText(c.querySelector('.mw-cell-weather'))}`);
+  if (q('.stat-card').length) return q('.stat-card').map(c=>`- ${mdText(c.querySelector('.stat-card-label'))}：${mdText(c.querySelector('.stat-card-num'))}`);
+  if (q('.progress-item').length) return q('.progress-item').map(p=>`- ${mdText(p.querySelector('.progress-label'))}：${mdText(p.querySelector('.progress-info'))}`);
+  if (q('.habit-trend').length) return q('.habit-trend').map(t=>`- ${mdText(t.querySelector('.habit-trend-name'))}（${mdText(t.querySelector('.habit-trend-tag'))}）：${mdText(t.querySelector('.habit-trend-seq'))}`);
+  if (q('.stuck-rank-item').length) return q('.stuck-rank-item').map(s=>`- ${mdText(s.querySelector('.stuck-rank-no'))}. ${mdText(s.querySelector('.stuck-rank-word'))}（${mdText(s.querySelector('.stuck-rank-count'))}）`);
+  if (q('.timeline-item').length) return q('.timeline-item').map(mdTimelineItem);
+  if (q('.wc-word').length) return [q('.wc-word').map(w=>mdText(w)).join('、')];
+  const empty = body.querySelector('.rs-empty,.review-detail-empty');
+  if (empty) return [mdText(empty)];
+  const t = mdText(body);
+  return t ? [t] : [];
+}
+function mdFoldSection(fold){
+  const head = fold.querySelector('.sub-fold-head');
+  const title = mdText(head).replace(/[▾▸]\s*$/,'').trim();
+  const lines = mdBodyLines(fold.querySelector('.sub-fold-body'));
+  return `### ${title}\n\n${lines.join('\n')}\n\n`;
+}
+function mdContainerChildren(container){
+  let md = '';
+  if (!container) return md;
+  [...container.children].forEach(child=>{
+    if (child.classList.contains('sub-fold')) md += mdFoldSection(child);
+    else if (child.classList.contains('chart-title')) md += `### ${mdText(child)}\n\n`;
+    else {
+      const lines = mdBodyLines(child);
+      if (lines.length) md += lines.join('\n') + '\n\n';
+    }
+  });
+  return md;
+}
+function mdReflection(card){
+  let md = '';
+  if (!card) return md;
+  card.querySelectorAll('.reflection-block').forEach(b=>{
+    const qEl = b.querySelector('.reflection-q');
+    const ta = b.querySelector('textarea');
+    if (qEl && ta) md += `### ${mdText(qEl)}\n\n${ta.value.trim() || '（未填写）'}\n\n`;
+  });
+  const tags = [...card.querySelectorAll('#refTags .tag.active')].map(t=>mdText(t));
+  if (tags.length) md += `### 标签\n\n${tags.map(t=>'#'+t).join(' ')}\n\n`;
+  return md;
+}
+function exportWeekReviewMd(){
+  const label = mdText(document.getElementById('weekReviewLabel')) || '本周';
+  let md = `# 周复盘（${label}）\n\n## 📋 数据概览\n\n`;
+  const period = mdText(document.getElementById('weekPeriodText'));
+  if (period) md += `> ${period}\n\n`;
+  const overview = document.querySelector('.rev-fold[data-collapse="weekOverview"]');
+  if (overview) overview.querySelectorAll('.sub-fold').forEach(f=>{ md += mdFoldSection(f); });
+  md += `## 💭 深度反思\n\n` + mdReflection(document.querySelector('.rev-fold[data-collapse="weekReflection"]'));
+  downloadMd(`周复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
+}
+function exportMonthReviewMd(){
+  const label = mdText(document.getElementById('monthReviewLabel')) || '本月';
+  let md = `# 月复盘（${label}）\n\n## 📋 数据概览\n\n`;
+  md += mdContainerChildren(document.getElementById('monthReviewContent'));
+  md += `## 💭 深度反思\n\n` + mdReflection(document.querySelector('.rev-fold[data-collapse="monthReflection"]'));
+  downloadMd(`月复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
+}
+function exportSeasonReviewMd(){
+  const label = mdText(document.getElementById('seasonReviewLabel')) || '本季';
+  let md = `# 季复盘（${label}）\n\n## 📋 数据概览\n\n`;
+  md += mdContainerChildren(document.getElementById('seasonReviewContent'));
+  md += `## 💭 深度反思\n\n` + mdReflection(document.querySelector('.rev-fold[data-collapse="seasonReflection"]'));
+  downloadMd(`季复盘_${label.replace(/[\\/:*?"<>|\s]+/g,'_')}.md`, md);
 }
 
 // 导入JSON备份
@@ -3538,7 +3769,7 @@ function renderReviewSection(section){
       }
     });
     const mm = latestMindmap('book');
-    const mmCard = `<div class="card collapsible open" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
+    const mmCard = `<div class="card collapsible open" style="margin-bottom:12px;"><div class="card-title clickable"><span style="display:flex;align-items:center;gap:12px;"><span>🧠 思维导图</span><button class="md-export-btn" data-md-export="book" title="只导出树状思维导图">导出md</button></span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
       <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
     body.innerHTML = mmCard + (items.length
       ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
@@ -3556,7 +3787,7 @@ function renderReviewSection(section){
       }
     });
     const mm = latestMindmap('study');
-    const mmCard = `<div class="card collapsible open" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图</span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
+    const mmCard = `<div class="card collapsible open" style="margin-bottom:12px;"><div class="card-title clickable"><span style="display:flex;align-items:center;gap:12px;"><span>🧠 思维导图</span><button class="md-export-btn" data-md-export="study" title="只导出树状思维导图">导出md</button></span><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
       <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
     body.innerHTML = mmCard + (items.length
       ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
@@ -3564,21 +3795,9 @@ function renderReviewSection(section){
       </div>`).join('')
       : '<div class="review-detail-empty">暂无学习记录</div>');
   } else if (section==='growth'){
-    const items = [];
-    keys.forEach(dk=>{
-      const e = entries[dk];
-      if (e && e.growthRecords && e.growthRecords.length){
-        e.growthRecords.forEach((r,i)=>{ items.push({dk, content:r.content, tags:r.tags||[]}); });
-      }
-    });
+    const { items, groups } = collectGrowthGroups();
     // 收集所有标签
     const allTags = [...new Set(items.flatMap(x=>x.tags))];
-    // 按标签分组（无标签归入「未分类」，多标签会出现在多个分组中）
-    const groups = {};
-    items.forEach(it=>{
-      const ts = it.tags.length ? it.tags : ['未分类'];
-      ts.forEach(t=>{ (groups[t] = groups[t] || []).push(it); });
-    });
     let groupNames = Object.keys(groups);
     if (growthTagFilter) groupNames = groupNames.filter(t=>t===growthTagFilter);
     groupNames.sort((a,b)=> groups[b].length - groups[a].length || a.localeCompare(b));
@@ -3594,7 +3813,7 @@ function renderReviewSection(section){
         </div>`).join('')}</div>
       </div>`;
     }).join('') : '<div class="review-detail-empty">暂无成长记录</div>';
-    body.innerHTML = `<div class="growth-wrap">${filterBar}${groupsHtml}</div>`;
+    body.innerHTML = `<div class="growth-wrap"><div style="display:flex;justify-content:flex-end;margin-bottom:10px;"><button class="md-export-btn" data-md-export="growth" title="按标签分组导出成长内容">导出md</button></div>${filterBar}${groupsHtml}</div>`;
   }
   initCollapsible();
 }
@@ -4058,7 +4277,45 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   document.getElementById('saveBtn').addEventListener('click', saveEntry);
   document.getElementById('exportBtn').addEventListener('click', exportData);
-  document.getElementById('exportExcelBtn').addEventListener('click', exportMarkdown);
+  document.getElementById('exportExcelBtn').addEventListener('click', openExportMdModal);
+  // Markdown 导出：范围选择弹窗
+  document.getElementById('exportRangeTypes').addEventListener('click',(e)=>{
+    const b = e.target.closest('button[data-type]');
+    if (!b) return;
+    exportRangeType = b.dataset.type;
+    document.querySelectorAll('#exportRangeTypes button').forEach(x=>x.classList.toggle('active', x===b));
+    renderExportRangeControls();
+  });
+  document.getElementById('exportRangeControls').addEventListener('input', updateExportRangeCount);
+  document.getElementById('exportRangeControls').addEventListener('change', updateExportRangeCount);
+  document.getElementById('exportRangeControls').addEventListener('click',(e)=>{
+    const tool = e.target.closest('[data-days-tool]');
+    if (!tool) return;
+    const check = tool.dataset.daysTool==='all';
+    document.querySelectorAll('.exp-day-check').forEach(c=>{ c.checked = check; });
+    updateExportRangeCount();
+  });
+  document.getElementById('exportMdCancel').addEventListener('click', closeExportMdModal);
+  document.getElementById('exportMdModal').addEventListener('click',(e)=>{ if (e.target===e.currentTarget) closeExportMdModal(); });
+  document.getElementById('exportMdOk').addEventListener('click',()=>{
+    const sel = computeExportSelection();
+    if (!sel.keys.length){ showToast('所选范围暂无数据'); return; }
+    closeExportMdModal();
+    exportMarkdown(sel.keys, sel.label);
+  });
+  // 各类「导出md」按钮（捕获阶段拦截，避免触发卡片折叠）
+  document.addEventListener('click',(e)=>{
+    const btn = e.target.closest('[data-md-export]');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const kind = btn.dataset.mdExport;
+    if (kind==='book' || kind==='study') exportMindmapMd(kind);
+    else if (kind==='growth') exportGrowthMd();
+    else if (kind==='week') exportWeekReviewMd();
+    else if (kind==='month') exportMonthReviewMd();
+    else if (kind==='season') exportSeasonReviewMd();
+  }, true);
   document.getElementById('importBtn').addEventListener('click',()=>{ document.getElementById('importFile').click(); });
   document.getElementById('importFile').addEventListener('change',(e)=>{
     const f = e.target.files[0];
