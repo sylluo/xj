@@ -522,6 +522,8 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .prompt-title { font-size:14px;color:var(--text);margin-bottom:12px;line-height:1.5; }
 .prompt-input { width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;color:var(--text);background:#f7f9fa;outline:none; }
 .prompt-input:focus { border-color:var(--primary);background:#fff; }
+.prompt-textarea { resize:vertical;min-height:92px;line-height:1.5;white-space:pre-wrap; }
+.prompt-hint { margin-top:6px;font-size:11px;color:var(--text-secondary); }
 .prompt-actions { display:flex;gap:10px;margin-top:14px; }
 .prompt-actions button { flex:1;padding:10px 0;border-radius:10px;border:1px solid var(--border);background:#f5f7f8;color:var(--text-secondary);font-family:inherit;font-size:14px;cursor:pointer; }
 .prompt-actions button.primary { background:var(--primary);border-color:var(--primary);color:#fff; }
@@ -1566,6 +1568,8 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
   <div class="prompt-box">
     <div class="prompt-title" id="promptTitle">请输入</div>
     <input type="text" class="prompt-input" id="promptInput" autocomplete="off">
+    <textarea class="prompt-input prompt-textarea" id="promptTextarea" rows="4" style="display:none"></textarea>
+    <div class="prompt-hint" id="promptHint" style="display:none">按回车换行</div>
     <div class="prompt-actions">
       <button id="promptCancel">取消</button>
       <button class="primary" id="promptOk">确定</button>
@@ -3187,18 +3191,29 @@ function showPrompt(opts){
   opts = typeof opts==='string' ? {title:opts} : (opts||{});
   const modal = document.getElementById('promptModal');
   const input = document.getElementById('promptInput');
+  const ta = document.getElementById('promptTextarea');
+  const hint = document.getElementById('promptHint');
+  const multi = !!opts.multiline;
   document.getElementById('promptTitle').textContent = opts.title || '请输入';
+  input.style.display = multi ? 'none' : '';
+  ta.style.display = multi ? '' : 'none';
+  hint.style.display = multi ? '' : 'none';
+  ta.rows = opts.rows || 4;
   input.value = opts.value!=null ? opts.value : '';
+  ta.value = opts.value!=null ? opts.value : '';
   input.placeholder = opts.placeholder || '';
+  ta.placeholder = opts.placeholder || '';
   modal.classList.add('show');
-  setTimeout(()=>{ input.focus(); input.select(); }, 30);
+  const el = multi ? ta : input;
+  setTimeout(()=>{ el.focus(); if (!multi) el.select(); }, 30);
   return new Promise(resolve=>{ promptResolve = resolve; });
 }
 function closePrompt(ok){
   const modal = document.getElementById('promptModal');
   if (!modal || !modal.classList.contains('show')) return;
+  const ta = document.getElementById('promptTextarea');
   const input = document.getElementById('promptInput');
-  const val = input.value;
+  const val = (ta.style.display!=='none') ? ta.value : input.value;
   modal.classList.remove('show');
   const cb = promptResolve;
   promptResolve = null;
@@ -3246,12 +3261,14 @@ function drawMindmap(){
         const nLine = n.shape==='line';
         const pw = pLine ? mmNodeWidth(p) : 0;
         const nw = nLine ? mmNodeWidth(n) : 0;
+        const ph = mmNodeLayout(p).h;
+        const nh = mmNodeLayout(n).h;
         // 父节点：从下划线靠子节点一侧的端点出发
         const px = pLine ? (p.x <= n.x ? p.x + pw/2 : p.x - pw/2) : p.x;
-        const py = pLine ? p.y + 14 : p.y;
+        const py = pLine ? p.y + ph/2 : p.y;
         // 子节点：落在下划线靠父节点一侧的端点
         const nx = nLine ? (n.x >= p.x ? n.x - nw/2 : n.x + nw/2) : n.x;
-        const ny = nLine ? n.y + 14 : n.y;
+        const ny = nLine ? n.y + nh/2 : n.y;
         ctx.strokeStyle = '#a8b3bd';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -3266,9 +3283,10 @@ function drawMindmap(){
     const inMulti = mmMultiSel.has(n.id);
     const selected = inMulti || n.id===mmSelectedId;
     ctx.font = mmNodeFont(n);
+    const lay = mmNodeLayout(n);
     const label = mmLabel(n);
-    const w = mmNodeWidth(n);
-    const h = 28;
+    const w = lay.w;
+    const h = lay.h;
     const hasFill = !!n.fill;
     const isLine = n.shape==='line';
     ctx.fillStyle = hasFill ? n.fill : (selected ? '#5b8c7d' : (n.parent===null ? '#e8a87c' : '#ffffff'));
@@ -3286,9 +3304,13 @@ function drawMindmap(){
       ctx.stroke();
     }
     ctx.fillStyle = n.color ? n.color : (isLine ? '#2f3a44' : (selected && !hasFill ? '#fff' : (n.parent===null ? '#fff' : '#2f3a44')));
-    ctx.textAlign = 'center';
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(label, n.x, n.y);
+    // 多行文本：水平居左、垂直居中，按行排布
+    const padX = n.shape==='ellipse' ? 14 : 10;
+    const textX = n.x - w/2 + padX;
+    const startY = n.y - (lay.lines.length-1) * MM_LINE_H / 2;
+    lay.lines.forEach((ln,i)=>{ ctx.fillText(ln, textX, startY + i*MM_LINE_H); });
     // 多选勾选标记
     if (inMulti){
       ctx.beginPath();
@@ -3361,8 +3383,8 @@ function mmSummaryLayout(){
   });
   const out = [];
   groups.forEach(g=>{
-    const y0 = Math.min(...g.nodes.map(n=>n.y-14));
-    const y1 = Math.max(...g.nodes.map(n=>n.y+14));
+    const y0 = Math.min(...g.nodes.map(n=>n.y-mmNodeLayout(n).h/2));
+    const y1 = Math.max(...g.nodes.map(n=>n.y+mmNodeLayout(n).h/2));
     const x = Math.max(...g.nodes.map(n=>n.x + mmNodeWidth(n)/2)) + 26;
     out.push({text:g.text, nodes:g.nodes, x, y0, y1, ym:(y0+y1)/2});
   });
@@ -3370,7 +3392,8 @@ function mmSummaryLayout(){
 }
 // 节点右下角按钮几何位置（add: 新增子节点；tog: 收起/展开）
 function mmBadgeGeom(n, w){
-  const y = n.y + 12;
+  const h = mmNodeLayout(n).h;
+  const y = n.y + h/2 - 2;
   const addX = n.x + w/2 + 8;
   return {addX, addY:y, togX:addX-20, togY:y, r:8};
 }
@@ -3390,9 +3413,55 @@ function mmNodePath(ctx, shape, cx, cy, w, h){
   roundRect(ctx, cx-w/2, cy-h/2, w, h, r);
 }
 function mmNodeWidth(n){
-  mmCtx.font = mmNodeFont(n);
+  return mmNodeLayout(n).w;
+}
+// 节点文本最大宽度：随画布宽度自适应，超过即换行（适配 iOS 手机窄屏）
+function mmMaxNodeW(){
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = (mmCanvas && mmCanvas.width) ? mmCanvas.width/dpr : 360;
+  return Math.max(120, Math.min(cssW * 0.7, 340));
+}
+// 按最大宽度折行：中文按字断行，英文/数字整词保留，支持手动换行
+const MM_LINE_H = 18;
+function mmWrapText(text, maxW, font){
+  mmCtx.font = font;
+  const out = [];
+  String(text == null ? '' : text).split('\n').forEach(seg=>{
+    const tokens = seg.match(/[A-Za-z0-9_\-.,%:;/'"@#]+|\s+|[\s\S]/g) || [];
+    let line = '';
+    tokens.forEach(t=>{
+      if (/^\s+$/.test(t)) { if (line) line += ' '; return; }
+      // 单个词本身超过最大宽度时按字符拆分，避免溢出画布
+      const parts = (t.length > 1 && mmCtx.measureText(t).width > maxW) ? t.split('') : [t];
+      parts.forEach(p=>{
+        if (!line) { line = p; return; }
+        if (mmCtx.measureText(line + p).width > maxW){
+          out.push(line.replace(/\s+$/,''));
+          line = p;
+        } else {
+          line += p;
+        }
+      });
+    });
+    out.push(line);
+  });
+  return out.length ? out : [''];
+}
+// 节点布局：宽高与折行后的文本行
+function mmNodeLayout(n){
+  const font = mmNodeFont(n);
+  mmCtx.font = font;
   const extra = n.shape==='ellipse' ? 28 : 20;
-  return Math.max(60, mmCtx.measureText(mmLabel(n)).width + extra);
+  const maxTextW = Math.max(40, mmMaxNodeW() - extra);
+  const lines = mmWrapText(mmLabel(n), maxTextW, font);
+  let maxLineW = 0;
+  lines.forEach(l=>{ maxLineW = Math.max(maxLineW, mmCtx.measureText(l).width); });
+  return {
+    w: Math.max(60, maxLineW + extra),
+    h: Math.max(28, (lines.length-1) * MM_LINE_H + 28),
+    lines,
+    font
+  };
 }
 function roundRect(ctx,x,y,w,h,r){
   ctx.beginPath();
@@ -3407,9 +3476,8 @@ function mmHitTest(x,y){
   const visible = getVisibleMmNodes();
   for (let i=visible.length-1;i>=0;i--){
     const n = visible[i];
-    const w = mmNodeWidth(n);
-    const h = 28;
-    if (x>=n.x-w/2 && x<=n.x+w/2 && y>=n.y-h/2 && y<=n.y+h/2) return n;
+    const lay = mmNodeLayout(n);
+    if (x>=n.x-lay.w/2 && x<=n.x+lay.w/2 && y>=n.y-lay.h/2 && y<=n.y+lay.h/2) return n;
   }
   return null;
 }
@@ -3884,7 +3952,9 @@ function mindmapToMarkdown(mm){
   });
   function walk(node, depth){
     const indent = '  '.repeat(depth);
-    let s = `${indent}- ${node.text||'节点'}\n`;
+    // 节点内手动换行转成 <br>，避免打断 Markdown 列表层级
+    const label = String(node.text||'节点').replace(/\s*\n\s*/g,'<br>');
+    let s = `${indent}- ${label}\n`;
     node.children.forEach(c=>{ s += walk(c, depth+1); });
     return s;
   }
@@ -4740,8 +4810,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // 工具栏
   async function editMmNode(node){
     if (!node) return;
-    const txt = await showPrompt({title:'编辑节点文字', value:node.text});
-    if (txt !== null && txt.trim()) { node.text = txt.trim(); drawMindmap(); }
+    const txt = await showPrompt({title:'编辑节点文字', value:node.text, multiline:true, rows:5});
+    if (txt !== null && txt.trim()) {
+      node.text = txt.replace(/[ \t]+$/gm,'').trim(); // 保留手动换行
+      drawMindmap();
+    }
   }
   function mmAddChild(parentId){
     const parent = mmNodes.find(n=>n.id===parentId);
@@ -4969,6 +5042,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('promptOk').addEventListener('click',()=>closePrompt(true));
   document.getElementById('promptInput').addEventListener('keydown',(e)=>{
     if (e.key==='Enter'){ e.preventDefault(); closePrompt(true); }
+    else if (e.key==='Escape'){ e.preventDefault(); closePrompt(false); }
+  });
+  // 多行模式：回车换行，Ctrl/⌘+回车保存，Esc 取消
+  document.getElementById('promptTextarea').addEventListener('keydown',(e)=>{
+    if (e.key==='Enter' && (e.metaKey || e.ctrlKey)){ e.preventDefault(); closePrompt(true); }
     else if (e.key==='Escape'){ e.preventDefault(); closePrompt(false); }
   });
   document.getElementById('promptModal').addEventListener('click',(e)=>{
