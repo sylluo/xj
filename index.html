@@ -2592,7 +2592,22 @@ function renderHabitStats() {
 }
 
 function exportData(){
-  const data = JSON.stringify(entries,null,2);
+  // 收集周/月/季复盘的独立反思数据（wr_/mr_/sr_ 前缀的 localStorage 键）
+  const reflections = {};
+  try {
+    for (let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if (/^(wr_|mr_|sr_)/.test(k)){ try { reflections[k] = JSON.parse(localStorage.getItem(k)); } catch(e){} }
+    }
+  } catch(e){}
+  let seasonPin = null;
+  try { seasonPin = JSON.parse(localStorage.getItem('seasonPin')||'null'); } catch(e){}
+  const data = JSON.stringify(Object.assign({}, entries, {
+    _fixedTodos: fixedTodos,
+    _savedMindmaps: savedMindmaps,
+    _reflections: reflections,
+    _seasonPin: seasonPin
+  }),null,2);
   const blob = new Blob([data],{type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url;
@@ -2992,6 +3007,31 @@ function importData(file){
         }
       });
       localStorage.setItem('diaryEntries', JSON.stringify(entries));
+      // 恢复四象限固定事项（不随日期变化的待办）
+      if (data._fixedTodos && typeof data._fixedTodos === 'object'){
+        ['Q1','Q2','Q3','Q4','unassigned'].forEach(q=>{
+          if (Array.isArray(data._fixedTodos[q])) fixedTodos[q] = data._fixedTodos[q];
+        });
+        saveFixedTodos();
+        if (typeof renderQuadLists === 'function') renderQuadLists();
+      }
+      // 恢复书账/学习思维导图（全局最新各一份）
+      if (data._savedMindmaps && typeof data._savedMindmaps === 'object'){
+        if (data._savedMindmaps.book) savedMindmaps.book = data._savedMindmaps.book;
+        if (data._savedMindmaps.study) savedMindmaps.study = data._savedMindmaps.study;
+        try { localStorage.setItem('savedMindmaps', JSON.stringify(savedMindmaps)); } catch(e){}
+      }
+      // 恢复周/月/季复盘的深度反思（wr_/mr_/sr_ 前缀键）
+      if (data._reflections && typeof data._reflections === 'object'){
+        Object.keys(data._reflections).forEach(k=>{
+          if (/^(wr_|mr_|sr_)/.test(k)){ try { localStorage.setItem(k, JSON.stringify(data._reflections[k])); } catch(e){} }
+        });
+      }
+      // 恢复季度关键词首页固定
+      if (data._seasonPin){
+        try { localStorage.setItem('seasonPin', JSON.stringify(data._seasonPin)); } catch(e){}
+        if (typeof renderSeasonPin === 'function') renderSeasonPin();
+      }
       loadEntry();
       showToast(`✅ 导入成功：${cnt}条记录${merged?'('+merged+'条合并)':''}`);
     }catch(err){
