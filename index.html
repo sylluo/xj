@@ -308,8 +308,12 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .review-mm-card .card-title { margin:0; justify-content:space-between; gap:12px; }
 .review-mm-card .card-title::after { display:none; }
 .review-card-actions { display:flex;align-items:center;gap:18px;margin-left:auto;flex-shrink:0; }
-.review-mm-card .collapse-btn { width:30px;height:30px;padding:0;border-radius:50%;background:var(--primary-lighter);border:1px solid var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.review-mm-card .collapse-btn .icon { width:16px;height:16px; }
+.review-mm-card .collapse-btn { width:auto;height:auto;padding:0 2px;border:none;background:transparent;color:var(--text-secondary);opacity:.75;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.review-mm-card .collapse-btn .icon { display:none; }
+.review-mm-card .collapse-btn::after { content:'▾';font-size:16px;line-height:1;display:block;transition:transform .25s ease; }
+.card.collapsible.review-mm-card.collapsed .collapse-btn { transform:none; }
+.card.collapsible.review-mm-card.collapsed .collapse-btn::after { transform:rotate(-90deg); }
+.review-mm-card .card.collapsible .card-title .collapse-btn { color:var(--text-secondary); padding:0 2px; background:transparent; border:none; }
 .review-mm-card .collapse-body { padding-top:6px; }
 /* 导出预览弹窗 */
 .md-export-preview { max-height:38vh;overflow:auto;background:#f7f9fa;border:1px solid var(--border-light);border-radius:10px;padding:10px;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--text-secondary);margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace; }
@@ -707,34 +711,59 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
 .growth-group-body .review-list-item { margin-bottom:6px; background:#f8fafb; }
 .growth-group-body .review-list-item:last-child { margin-bottom:0; }
 
-/* ============ 回顾 / 复盘子页统一背景：整页一层纸面，内部用分隔线 ============ */
+/* ============ 回顾 / 复盘子页背景：与时间管理页一致，页面底纹连贯 + 白卡 ============ */
 #reviewSectionBody, #reviewTodayWrap, .review-panel {
-  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px; padding:14px;
+  background:transparent; border:none; border-radius:0; padding:0;
 }
-#reviewSectionBody { min-height:120px; }
-#reviewTodayWrap .review-calendar-card { background:transparent; border:none; box-shadow:none; padding:0; margin-bottom:10px; }
+#reviewTodayWrap .review-calendar-card {
+  background:var(--bg-card); border:1px solid var(--border); box-shadow:var(--shadow-sm);
+  padding:16px; margin-bottom:12px;
+}
 #reviewTodayWrap .review-list-item,
 #reviewSectionBody .review-list-item {
-  background:transparent; border:none; border-bottom:1px dashed var(--border-light);
-  border-radius:0; margin-bottom:0; padding:10px 2px;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:12px;
+  margin-bottom:8px; padding:10px 12px;
 }
-#reviewTodayWrap .review-list-item:last-child,
-#reviewSectionBody .review-list-item:last-child { border-bottom:none; }
+#reviewSectionBody .review-list-item:last-child { margin-bottom:0; }
 #reviewTodayWrap .review-detail-card { background:#f7f9fa; border:1px solid var(--border-light); }
-#reviewSectionBody .growth-wrap { background:transparent; border:none; box-shadow:none; padding:0; }
-#reviewSectionBody .growth-group-body .review-list-item { background:transparent; }
-#reviewSectionBody .review-mm-card { padding:0; background:transparent; border:none; box-shadow:none; }
-.review-panel .rev-fold { background:transparent; box-shadow:none; border:none; overflow:visible; }
-.review-panel .rev-fold .card-title,
-.review-panel .rev-fold.blue .card-title {
-  background:#f4f7f6; color:var(--primary-dark);
-  border:1px solid var(--border-light); border-radius:10px;
+#reviewSectionBody .growth-wrap {
+  background:var(--bg-card); border:1px solid var(--border-light);
+  box-shadow:var(--shadow-sm); padding:10px 12px 4px; border-radius:12px;
 }
-.review-panel .rev-fold .collapse-body { background:transparent; padding:10px 2px 4px; }
-.review-panel .sub-fold { background:transparent; border:none; border-bottom:1px dashed var(--border-light); border-radius:0; margin-top:0; }
+#reviewSectionBody .growth-group-body .review-list-item { background:#f8fafb; border:none; }
+#reviewSectionBody .review-mm-card {
+  padding:14px 16px; background:var(--bg-card);
+  border:1px solid var(--border-light); box-shadow:var(--shadow-sm); border-radius:12px;
+}
+.review-panel .rev-fold {
+  background:var(--bg-card); box-shadow:var(--shadow-sm);
+  border:1px solid var(--border); border-radius:14px; overflow:hidden;
+}
+/* 数据概览：参照写日记页「晨间日记」 */
+.review-panel .rev-fold .card-title {
+  background:linear-gradient(135deg,#ffedc0 0%,#ffd98a 55%,#ffc64d 100%);
+  color:#8a5a10; border-bottom:1px solid rgba(138,90,16,.18);
+}
+/* 深度反思：参照写日记页「晚间日记」 */
+.review-panel .rev-fold.blue .card-title {
+  background:linear-gradient(135deg,#e0ebf7 0%,#bdd1e8 50%,#8fb0d6 100%);
+  color:#2c4a73; border-bottom:1px solid rgba(44,74,115,.18);
+}
+/* 折叠箭头：与写日记页「晨间日记」标题栏一致（▾ 文字箭头，收起时转 -90°） */
+.review-panel .rev-fold .collapse-btn { width:auto;height:auto;padding:0 2px;border:none;background:transparent;color:inherit;opacity:.75;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto; }
+.review-panel .rev-fold .collapse-btn .icon { display:none; }
+.review-panel .rev-fold .collapse-btn::after { content:'▾';font-size:16px;line-height:1;display:block;transition:transform .25s ease; }
+.review-panel .rev-fold .card-title .collapse-btn { background:transparent; border:none; color:inherit; }
+.card.collapsible.rev-fold.collapsed .collapse-btn { transform:none; }
+.card.collapsible.rev-fold.collapsed .collapse-btn::after { transform:rotate(-90deg); }
+.review-panel .card.collapsible .card-title .collapse-btn { color:inherit; padding:0 2px; background:transparent; border:none; }
+.review-panel .rev-fold .collapse-body { background:var(--bg-card); padding:14px 16px 16px; }
+/* 复盘子板块：分隔线排列 */
+.review-panel .sub-fold { background:transparent; border:none; border-radius:0; margin-top:0; border-bottom:1px solid var(--border-light); overflow:visible; }
 .review-panel .sub-fold:last-child { border-bottom:none; }
-.review-panel .sub-fold-head { background:transparent; padding:10px 2px; }
-.review-panel .sub-fold-body { padding:4px 2px 10px; }
+.review-panel .sub-fold-head { background:transparent; padding:10px 0; color:var(--text-primary); }
+.review-panel .sub-fold-head:active { opacity:.7; }
+.review-panel .sub-fold-body { padding:0 0 12px; background:transparent; }
 .review-period-card { background:#f7f9fa; border:1px solid var(--border-light); }
 
 /* 反思输入框字号：比小标题(13px)略小 */
@@ -796,6 +825,7 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
     <symbol id="i-table" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"></path></symbol>
     <symbol id="i-brain" viewBox="0 0 24 24"><path d="M12 2C9.5 2 8 4 8 6c-1.5 0-3 1.5-3 3.5 0 .5.1 1 .3 1.4C4 11.5 3 13 3 14.8 3 17.3 5 19 7.5 19c.5 0 1 0 1.5-.1.5 1.3 1.8 2.1 3 2.1s2.5-.8 3-2.1c.5.1 1 .1 1.5.1 2.5 0 4.5-1.7 4.5-4.2 0-1.8-1-3.3-2.3-3.9.2-.4.3-.9.3-1.4C19 7.5 17.5 6 16 6c0-2-1.5-4-4-4zm-1 5.5c.4 0 .8.4.8.8s-.4.8-.8.8-.8-.4-.8-.8.4-.8.8-.8zm2 0c.4 0 .8.4.8.8s-.4.8-.8.8-.8-.4-.8-.8.4-.8.8-.8zM9 12c.4 0 .8.4.8.8s-.4.8-.8.8-.8-.4-.8-.8.4-.8.8-.8zm6 0c.4 0 .8.4.8.8s-.4.8-.8.8-.8-.4-.8-.8.4-.8.8-.8zm-3 3c.4 0 .8.4.8.8s-.4.8-.8.8-.8-.4-.8-.8.4-.8.8-.8z"></path></symbol>
     <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.1-.9 2-2 2s-2-.9-2-2H5V5h14v10z"></path></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"></path></symbol>
   </defs>
 </svg>
 
@@ -1345,27 +1375,27 @@ textarea.lined { background:#fff repeating-linear-gradient(transparent,transpare
         <div class="collapse-body">
           <div class="review-period-card"><div class="review-period-text" id="weekPeriodText"></div></div>
           <div class="sub-fold" data-subfold="weekMood">
-            <div class="sub-fold-head">心情天气条<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-head">🌤️ 心情天气条<span class="sub-arrow">▾</span></div>
             <div class="sub-fold-body"><div class="mood-weather-strip" id="weekMoodWeather"></div></div>
           </div>
           <div class="sub-fold" data-subfold="weekHighlights">
-            <div class="sub-fold-head">本周亮点<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-head">✨ 本周亮点<span class="sub-arrow">▾</span></div>
             <div class="sub-fold-body" id="weekHighlights"></div>
           </div>
           <div class="sub-fold" data-subfold="weekStuck">
-            <div class="sub-fold-head">本周卡点<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-head">🚧 本周卡点<span class="sub-arrow">▾</span></div>
             <div class="sub-fold-body" id="weekStuck"></div>
           </div>
           <div class="sub-fold" data-subfold="weekSummaryFold">
-            <div class="sub-fold-head">运动/学习汇总<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-head">🏃 运动/学习汇总<span class="sub-arrow">▾</span></div>
             <div class="sub-fold-body" id="weekSummary"></div>
           </div>
           <div class="sub-fold" data-subfold="weekTimeline">
-            <div class="sub-fold-head">亲子/美食/新知/灵感<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-head">🌈 亲子/美食/新知/灵感<span class="sub-arrow">▾</span></div>
             <div class="sub-fold-body" id="weekTimeline"></div>
           </div>
           <div class="sub-fold" data-subfold="weekHabit">
-            <div class="sub-fold-head">习惯打卡率<span class="sub-arrow">▾</span></div>
+            <div class="sub-fold-head">✅ 习惯打卡率<span class="sub-arrow">▾</span></div>
             <div class="sub-fold-body" id="weekHabitProgress"></div>
           </div>
         </div>
