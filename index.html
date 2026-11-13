@@ -3955,14 +3955,56 @@ function mindmapToMarkdown(mm){
     // 节点内手动换行转成 <br>，避免打断 Markdown 列表层级
     const label = String(node.text||'节点').replace(/\s*\n\s*/g,'<br>');
     let s = `${indent}- ${label}\n`;
-    node.children.forEach(c=>{ s += walk(c, depth+1); });
+    mmSortedChildren(node.children).forEach(c=>{ s += walk(c, depth+1); });
     return s;
   }
   return walk(root, 0).trim();
 }
-// 思维导图 → 嵌套树 HTML
-function mindmapToTree(mm){
+// 读取节点文本开头的序号（如「1.」「（2）」「3、」「4 」），无序号返回 Infinity
+function mmOrderNo(text){
+  const m = String(text==null?'':text).match(/^\s*(?:[（(【\[]\s*)?(\d+(?:\.\d+)?)\s*(?:[)）】\]]|[.、,，:：]|\s|$)/);
+  return m ? parseFloat(m[1]) : Infinity;
+}
+// 同一层级的兄弟节点：有序号的按序号升序，无序号者保持原顺序排在后面
+function mmSortedChildren(children){
+  return children.slice().sort((a,b)=>{
+    const na = mmOrderNo(a.text), nb = mmOrderNo(b.text);
+    if (na===Infinity && nb===Infinity) return 0;
+    return na - nb;
+  });
+}
+// 回顾页树状图折叠状态（按 book / study 分开记忆）
+function readTreeCollapsed(kind){
+  try{
+    const o = JSON.parse(localStorage.getItem('reviewTreeCollapsed')||'{}');
+    return new Set((o && o[kind]) || []);
+  }catch(e){ return new Set(); }
+}
+function saveTreeCollapsed(kind, set){
+  try{
+    const o = JSON.parse(localStorage.getItem('reviewTreeCollapsed')||'{}');
+    o[kind] = [...set];
+    localStorage.setItem('reviewTreeCollapsed', JSON.stringify(o));
+  }catch(e){}
+}
+// 回顾页思维导图卡片整体的折叠状态记忆（book / study）
+function readMmCardCollapsed(kind){
+  try{
+    const o = JSON.parse(localStorage.getItem('reviewMmCardCollapsed')||'{}');
+    return !!o[kind];
+  }catch(e){ return false; }
+}
+function saveMmCardCollapsed(kind, val){
+  try{
+    const o = JSON.parse(localStorage.getItem('reviewMmCardCollapsed')||'{}');
+    o[kind] = !!val;
+    localStorage.setItem('reviewMmCardCollapsed', JSON.stringify(o));
+  }catch(e){}
+}
+// 思维导图 → 嵌套树 HTML（kind 用于恢复上次的折叠状态）
+function mindmapToTree(mm, kind){
   if (!mm || !mm.nodes || !mm.nodes.length) return '';
+  const collapsed = kind ? readTreeCollapsed(kind) : new Set();
   const byId = {};
   mm.nodes.forEach(n=>{ byId[n.id] = {...n, children:[]}; });
   let root = null;
@@ -3974,15 +4016,16 @@ function mindmapToTree(mm){
   function walk(node){
     const hasKids = node.children.length > 0;
     const label = (node.marker ? node.marker + ' ' : '') + (node.text || '节点');
-    let s = `<li class="mm-node">`;
+    const isCollapsed = hasKids && collapsed.has(node.id);
+    let s = `<li class="mm-node${isCollapsed?' mm-collapsed':''}" data-mm-id="${node.id}">`;
     if (hasKids) s += `<span class="mm-caret">▾</span>`;
     s += `<span class="mm-node-text">${escapeHtml(label)}</span>`;
     if (node.summary) s += `<div class="mm-summary-line">📝 ${escapeHtml(node.summary)}</div>`;
-    if (hasKids) s += `<ul>${node.children.map(walk).join('')}</ul>`;
+    if (hasKids) s += `<ul>${mmSortedChildren(node.children).map(walk).join('')}</ul>`;
     s += '</li>';
     return s;
   }
-  return `<div class="mm-tree"><ul>${walk(root)}</ul></div>`;
+  return `<div class="mm-tree" data-mm-kind="${kind||''}"><ul>${walk(root)}</ul></div>`;
 }
 
 // ============ 回顾页 4 个 Section Tabs ============
@@ -4014,8 +4057,9 @@ function renderReviewSection(section){
       }
     });
     const mm = latestMindmap('book');
-    const mmCard = `<div class="card collapsible open review-mm-card" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图<button class="md-export-btn" data-md-export="book" title="只导出树状思维导图">导出md</button></span><span class="review-card-actions"><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
-      <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
+    const mmCardCls = readMmCardCollapsed('book') ? 'collapsed' : 'open';
+    const mmCard = `<div class="card collapsible ${mmCardCls} review-mm-card" data-mm-card-kind="book" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图<button class="md-export-btn" data-md-export="book" title="只导出树状思维导图">导出md</button></span><span class="review-card-actions"><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
+      <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm,'book'):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
     body.innerHTML = mmCard + (items.length
       ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
         <div class="review-list-content">${escapeHtml(it.note)}</div>
@@ -4032,8 +4076,9 @@ function renderReviewSection(section){
       }
     });
     const mm = latestMindmap('study');
-    const mmCard = `<div class="card collapsible open review-mm-card" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图<button class="md-export-btn" data-md-export="study" title="只导出树状思维导图">导出md</button></span><span class="review-card-actions"><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
-      <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
+    const mmCardCls = readMmCardCollapsed('study') ? 'collapsed' : 'open';
+    const mmCard = `<div class="card collapsible ${mmCardCls} review-mm-card" data-mm-card-kind="study" style="margin-bottom:12px;"><div class="card-title clickable"><span>🧠 思维导图<button class="md-export-btn" data-md-export="study" title="只导出树状思维导图">导出md</button></span><span class="review-card-actions"><button class="collapse-btn" title="折叠/展开"><svg class="icon"><use href="#i-arrow-up"/></svg></button></span></div>
+      <div class="collapse-body"><div class="review-mindmap-view" style="margin:0;border-top:none;padding-top:0;">${mm?mindmapToTree(mm,'study'):'<div class="review-detail-empty" style="padding:8px 0;">暂无思维导图</div>'}</div></div></div>`;
     body.innerHTML = mmCard + (items.length
       ? items.map(it=>`<div class="review-list-item"><div class="review-list-date"><span class="num">${it.dk}</span></div>
         <div class="review-list-content"><b>${escapeHtml(it.content)}</b> ${it.type?`· ${escapeHtml(it.type)}`:''} ${it.duration?`· ${it.duration}分钟`:''} ${it.note?`— ${escapeHtml(it.note)}`:''}</div>
@@ -4191,6 +4236,8 @@ function initCollapsible(){
       if (e.target.closest('.collapse-btn')){ e.stopPropagation(); }
       card.classList.toggle('collapsed');
       if (body) body.style.maxHeight = card.classList.contains('collapsed') ? '0px' : '';
+      const kind = card.dataset.mmCardKind;
+      if (kind) saveMmCardCollapsed(kind, card.classList.contains('collapsed'));
     });
   });
 }
@@ -4220,7 +4267,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const caret = e.target.closest('#reviewSectionBody .mm-caret');
     if (caret){
       const li = caret.closest('li');
-      if (li) li.classList.toggle('mm-collapsed');
+      if (li){
+        li.classList.toggle('mm-collapsed');
+        // 记忆折叠状态，下次进入页面保持
+        const tree = caret.closest('.mm-tree');
+        const kind = tree ? tree.dataset.mmKind : '';
+        const id = Number(li.dataset.mmId);
+        if (kind && !isNaN(id)){
+          const set = readTreeCollapsed(kind);
+          if (li.classList.contains('mm-collapsed')) set.add(id); else set.delete(id);
+          saveTreeCollapsed(kind, set);
+        }
+      }
       return;
     }
     const gh = e.target.closest('#reviewSectionBody .growth-group-head');
