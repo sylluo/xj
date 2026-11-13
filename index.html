@@ -3419,7 +3419,7 @@ function mmNodeWidth(n){
 function mmMaxNodeW(){
   const dpr = window.devicePixelRatio || 1;
   const cssW = (mmCanvas && mmCanvas.width) ? mmCanvas.width/dpr : 360;
-  return Math.max(120, Math.min(cssW * 0.7, 340));
+  return Math.max(120, Math.min(cssW * 0.9, 340));
 }
 // 按最大宽度折行：中文按字断行，英文/数字整词保留，支持手动换行
 const MM_LINE_H = 18;
